@@ -4,20 +4,21 @@ data "aws_kms_alias" "ebs" {
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "~> 20.0"
+  version = "~> 21.0"
 
-  cluster_name    = var.cluster_name
-  cluster_version = var.cluster_version
-  enable_irsa     = true
+  name               = var.cluster_name
+  kubernetes_version = var.cluster_version
+  enable_irsa        = true
 
   # Disable default-enabled audit/api/authenticator logs
-  cluster_enabled_log_types = []
+  enabled_log_types = []
 
-  bootstrap_self_managed_addons = false
-  cluster_addons = {
+  # Hardcoded to false
+  # bootstrap_self_managed_addons = false
+  addons = {
     aws-ebs-csi-driver = {
       most_recent              = true
-      service_account_role_arn = module.ebs_csi_driver_irsa.iam_role_arn
+      service_account_role_arn = module.ebs_csi_driver_irsa.arn
     }
     coredns = {
       addon_version     = "v1.11.4-eksbuild.2"
@@ -37,7 +38,7 @@ module "eks" {
     }
   }
 
-  cluster_endpoint_public_access = true
+  endpoint_public_access = true
 
   # Adds the current caller identity as an administrator via cluster access entry
   enable_cluster_creator_admin_permissions = true
@@ -71,22 +72,25 @@ module "eks" {
 
       # public IP and single subnet (for now)
       subnets = [module.vpc.public_subnets[0]]
+
       network_interfaces = [{
         device_index                = 0
         associate_public_ip_address = true
       }]
 
       # Encrypt the root disk
-      block_device_mappings = [{
-        device_name = "/dev/xvda"
-        ebs = {
-          delete_on_termination = true
-          encrypted             = true
-          kms_key_id            = data.aws_kms_alias.ebs.target_key_arn
-          volume_size           = 100
-          volume_type           = "gp3"
+      block_device_mappings = {
+        root = {
+          device_name = "/dev/xvda"
+          ebs = {
+            delete_on_termination = true
+            encrypted             = true
+            kms_key_id            = data.aws_kms_alias.ebs.target_key_arn
+            volume_size           = 100
+            volume_type           = "gp3"
+          }
         }
-      }]
+      }
       # Add tags to the autoscaling group
       tags = try(ng_conf.tags, {})
     }
@@ -94,10 +98,11 @@ module "eks" {
 }
 
 module "ebs_csi_driver_irsa" {
-  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "~> 5.59"
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
+  version = "~> 6.0"
 
-  role_name_prefix = "${var.cluster_name}-ebs-csi-driver-"
+  name            = "${var.cluster_name}-ebs-csi-driver"
+  use_name_prefix = true
 
   attach_ebs_csi_policy = true
 
