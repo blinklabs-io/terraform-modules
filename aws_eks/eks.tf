@@ -78,6 +78,8 @@ module "eks" {
         associate_public_ip_address = true
       }]
 
+      metadata_options = try(ng_conf.metadata_options, null)
+
       # Encrypt the root disk
       block_device_mappings = {
         root = {
