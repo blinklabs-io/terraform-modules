@@ -71,7 +71,7 @@ module "eks" {
       autoscaling_group_tags = try(ng_conf.autoscaling_group_tags, {})
 
       # public IP and single subnet (for now)
-      subnets = [module.vpc.public_subnets[0]]
+      subnet_ids = [module.vpc.public_subnets[0]]
 
       network_interfaces = [{
         device_index                = 0
