@@ -22,6 +22,7 @@ resource "grafana_rule_group" "this" {
     content {
       name      = rule.value["title"]
       condition = rule.value["condition"]
+      for       = try(rule.value["for"], "0s")
 
       dynamic "data" {
         for_each = rule.value["data"]
