@@ -27,3 +27,13 @@ variable "tags" {
 variable "node_groups" {
   default = {}
 }
+variable "cluster_encryption_config" {
+  description = "Configuration for cluster encryption"
+  type = list(object({
+    provider = object({
+      key_arn = string
+    })
+    resources = list(string)
+  }))
+  default = []
+}
