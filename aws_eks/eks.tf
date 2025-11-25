@@ -6,9 +6,10 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 21.0"
 
-  name               = var.cluster_name
-  kubernetes_version = var.cluster_version
-  enable_irsa        = true
+  name                      = var.cluster_name
+  kubernetes_version        = var.cluster_version
+  cluster_encryption_config = var.cluster_encryption_config
+  enable_irsa               = true
 
   # Disable default-enabled audit/api/authenticator logs
   enabled_log_types = []
