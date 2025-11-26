@@ -8,7 +8,6 @@ module "eks" {
 
   name               = var.cluster_name
   kubernetes_version = var.cluster_version
-  encryption_config  = var.encryption_config
   enable_irsa        = true
 
   # Disable default-enabled audit/api/authenticator logs
