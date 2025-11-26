@@ -28,12 +28,10 @@ variable "node_groups" {
   default = {}
 }
 variable "encryption_config" {
-  description = "Configuration for cluster encryption"
-  type = list(object({
-    provider = object({
-      key_arn = string
-    })
-    resources = list(string)
-  }))
-  default = []
+  description = "Configuration block with encryption configuration for the cluster"
+  type = object({
+    provider_key_arn = optional(string)
+    resources        = optional(list(string), ["secrets"])
+  })
+  default = {}
 }
