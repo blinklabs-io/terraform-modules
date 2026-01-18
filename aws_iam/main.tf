@@ -32,7 +32,7 @@ data "aws_iam_policy_document" "policy_doc" {
 
   dynamic "statement" {
     for_each = each.value.statements
-    
+
     content {
       sid       = statement.value.sid
       effect    = statement.value.effect
