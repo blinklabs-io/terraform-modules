@@ -3,10 +3,9 @@ resource "cloudflare_pages_project" "this" {
   name              = var.page_name
   production_branch = var.production_branch
 
-  source {
+  source = {
     type = "github"
-
-    config {
+    config = {
       owner                         = var.owner
       repo_name                     = var.repo_name
       production_branch             = var.production_branch
@@ -18,19 +17,18 @@ resource "cloudflare_pages_project" "this" {
     }
   }
 
-  build_config {
+  build_config = {
     build_command   = var.build_command
     destination_dir = var.destination_dir
     root_dir        = var.root_dir
   }
 
-  deployment_configs {
-    preview {
+  deployment_configs = {
+    preview = {
       fail_open             = true
       environment_variables = var.preview_deployment_variables != {} ? var.preview_deployment_variables : var.deployment_variables
     }
-
-    production {
+    production = {
       fail_open             = true
       environment_variables = var.deployment_variables
     }
@@ -43,11 +41,13 @@ resource "cloudflare_pages_domain" "this" {
   depends_on   = [cloudflare_pages_project.this]
   account_id   = var.account_id
   project_name = var.page_name
-  domain       = each.value
+  name         = each.value
 }
 
 data "cloudflare_zone" "this" {
-  name = var.zone_name
+  filter = {
+    name = var.zone_name
+  }
 }
 
 resource "cloudflare_dns_record" "this" {
@@ -57,5 +57,6 @@ resource "cloudflare_dns_record" "this" {
   name    = each.value
   content = cloudflare_pages_project.this.subdomain
   type    = "CNAME"
+  ttl     = 1
   proxied = true
 }

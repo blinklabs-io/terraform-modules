@@ -28,31 +28,24 @@ locals {
 }
 
 resource "cloudflare_zone_setting" "this" {
-  for_each = local.zone_settings
+  for_each = { for k, v in local.zone_settings : k => v if v != null }
 
-  zone_id = cloudflare_zone.this.id
-
-  settings_id = each.key
-  value       = each.value
-}
-
-locals {
-  zone_security_headers = {
-    enabled            = true
-    preload            = true
-    max_age            = 31536000
-    include_subdomains = true
-  }
+  zone_id    = cloudflare_zone.this.id
+  setting_id = each.key
+  value      = each.value
 }
 
 resource "cloudflare_zone_setting" "security_header" {
-  for_each = local.zone_security_headers
-
-  zone_id = cloudflare_zone.this.id
-
-  settings_id = "security_header"
-  id          = each.key
-  value       = each.value
+  zone_id    = cloudflare_zone.this.id
+  setting_id = "security_header"
+  value = {
+    strict_transport_security = {
+      enabled            = true
+      preload            = true
+      max_age            = 31536000
+      include_subdomains = true
+    }
+  }
 }
 
 resource "cloudflare_dns_record" "a" {
@@ -62,6 +55,7 @@ resource "cloudflare_dns_record" "a" {
   name    = try(each.value.record_name, each.value.name)
   content = each.value.content
   type    = "A"
+  ttl     = each.value.proxied ? 1 : 30
   proxied = each.value.proxied
 }
 
@@ -72,6 +66,7 @@ resource "cloudflare_dns_record" "cname" {
   name    = try(each.value.record_name, each.value.name)
   content = each.value.content
   type    = "CNAME"
+  ttl     = each.value.proxied ? 1 : 30
   proxied = each.value.proxied
 }
 
@@ -83,6 +78,7 @@ resource "cloudflare_dns_record" "mx" {
   content  = each.value.value
   priority = each.value.priority
   type     = "MX"
+  ttl      = 30
 }
 
 resource "cloudflare_dns_record" "txt" {
@@ -92,4 +88,5 @@ resource "cloudflare_dns_record" "txt" {
   name    = try(each.value.record_name, each.value.name)
   content = each.value.content
   type    = "TXT"
+  ttl     = 30
 }
