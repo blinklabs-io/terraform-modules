@@ -22,6 +22,7 @@ variable "monitor_expected_codes" {
   default = "200"
 }
 variable "monitor_headers" {
+  type    = map(list(string))
   default = {}
 }
 variable "monitor_interval" {
@@ -49,11 +50,11 @@ variable "monitor_type" {
   default = "http"
 }
 variable "origins" {
-  type = object({
+  type = list(object({
     name    = string
     address = string
-  })
-  default = {}
+  }))
+  default = []
 }
 variable "zone_name" {
   type = string

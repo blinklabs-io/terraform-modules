@@ -1,3 +1,6 @@
+variable "account_id" {
+  type = string
+}
 variable "kind" {
   type = string
 }
