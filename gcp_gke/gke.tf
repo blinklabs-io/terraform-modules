@@ -1,5 +1,5 @@
 module "gke" {
-  source  = "terraform-google-modules/kubernetes-engine/google"
+  source  = "terraform-google-modules/kubernetes-engine/google//modules/private-cluster"
   version = "~> 35.0"
 
   project_id = var.project
@@ -25,6 +25,14 @@ module "gke" {
 
   # Workload identity
   identity_namespace = "${var.project}.svc.id.goog"
+
+  # Cluster labels
+  cluster_resource_labels = var.tags
+
+  # Private cluster configuration
+  enable_private_nodes    = var.enable_private_nodes
+  enable_private_endpoint = var.enable_private_endpoint
+  master_ipv4_cidr_block  = var.enable_private_nodes ? var.master_ipv4_cidr_block : null
 
   node_pools = [
     for np_name, np_conf in var.node_pools : {

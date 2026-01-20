@@ -60,3 +60,21 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "enable_private_nodes" {
+  description = "Enable private nodes (no public IPs on nodes)"
+  type        = bool
+  default     = false
+}
+
+variable "enable_private_endpoint" {
+  description = "Enable private endpoint (control plane not publicly accessible)"
+  type        = bool
+  default     = false
+}
+
+variable "master_ipv4_cidr_block" {
+  description = "CIDR block for the master network. Required when enable_private_nodes is true."
+  type        = string
+  default     = "172.16.0.0/28"
+}
