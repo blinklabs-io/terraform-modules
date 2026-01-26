@@ -16,7 +16,7 @@ jobs:
     outputs:
       modules: ${{ steps.find-modules.outputs.modules }}
     steps:
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3  # v6
+      - uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98  # v6
 
       - name: Find all Terraform modules
         id: find-modules
@@ -28,7 +28,7 @@ jobs:
     name: Format Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3  # v6
+      - uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98  # v6
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@a1502cd9e758c50496cc9ac5308c4843bcd56d36  # v3
@@ -45,7 +45,7 @@ jobs:
       matrix:
         module: ${{ fromJson(needs.detect-modules.outputs.modules) }}
     steps:
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3  # v6
+      - uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98  # v6
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@a1502cd9e758c50496cc9ac5308c4843bcd56d36  # v3
