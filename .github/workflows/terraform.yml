@@ -31,7 +31,7 @@ jobs:
       - uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98  # v6
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@a1502cd9e758c50496cc9ac5308c4843bcd56d36  # v3
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd  # v3
 
       - name: Terraform Format Check
         run: terraform fmt -check -recursive -diff
@@ -48,7 +48,7 @@ jobs:
       - uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98  # v6
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@a1502cd9e758c50496cc9ac5308c4843bcd56d36  # v3
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd  # v3
 
       - name: Terraform Init
         working-directory: ${{ matrix.module }}
