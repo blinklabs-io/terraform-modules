@@ -14,11 +14,11 @@ variable "azs" {
   type    = list(string)
 }
 variable "private_subnets" {
-  default = ["10.20.0.0/20"]
+  default = ["10.10.48.0/20"]
   type    = list(string)
 }
 variable "public_subnets" {
-  default = ["10.30.0.0/20", "10.30.16.0/20", "10.30.32.0/20"]
+  default = ["10.10.0.0/20", "10.10.16.0/20", "10.10.32.0/20"]
   type    = list(string)
 }
 variable "tags" {
