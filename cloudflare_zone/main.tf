@@ -44,6 +44,7 @@ resource "cloudflare_zone_setting" "security_header" {
       preload            = true
       max_age            = 31536000
       include_subdomains = true
+      nosniff            = true
     }
   }
 }
@@ -55,7 +56,7 @@ resource "cloudflare_dns_record" "a" {
   name    = try(each.value.record_name, each.value.name)
   content = each.value.content
   type    = "A"
-  ttl     = each.value.proxied ? 1 : 30
+  ttl     = each.value.proxied ? 1 : 60
   proxied = each.value.proxied
 }
 
@@ -66,7 +67,7 @@ resource "cloudflare_dns_record" "cname" {
   name    = try(each.value.record_name, each.value.name)
   content = each.value.content
   type    = "CNAME"
-  ttl     = each.value.proxied ? 1 : 30
+  ttl     = each.value.proxied ? 1 : 60
   proxied = each.value.proxied
 }
 
@@ -78,7 +79,7 @@ resource "cloudflare_dns_record" "mx" {
   content  = each.value.value
   priority = each.value.priority
   type     = "MX"
-  ttl      = 30
+  ttl      = 60
 }
 
 resource "cloudflare_dns_record" "txt" {
@@ -88,5 +89,5 @@ resource "cloudflare_dns_record" "txt" {
   name    = try(each.value.record_name, each.value.name)
   content = each.value.content
   type    = "TXT"
-  ttl     = 30
+  ttl     = 60
 }
