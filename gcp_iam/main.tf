@@ -31,3 +31,26 @@ resource "google_project_iam_member" "service_account" {
   role    = each.value.role
   member  = "serviceAccount:${google_service_account.this[each.value.sa_key].email}"
 }
+
+resource "google_organization_iam_member" "iam_member" {
+  for_each = merge([
+    for binding in var.organization_iam_bindings : {
+      for member in binding.members :
+      "${binding.role}::${member}" => {
+        role   = binding.role
+        member = member
+      }
+    }
+  ]...)
+
+  org_id = var.organization_id
+  role   = each.value.role
+  member = each.value.member
+
+  lifecycle {
+    precondition {
+      condition     = var.organization_id != null
+      error_message = "organization_id must be specified when organization_iam_bindings is non-empty."
+    }
+  }
+}
