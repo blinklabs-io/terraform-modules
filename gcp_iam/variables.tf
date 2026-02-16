@@ -31,6 +31,21 @@ variable "custom_roles" {
   default = []
 }
 
+variable "organization_id" {
+  description = "GCP organization ID for organization-level IAM bindings"
+  type        = string
+  default     = null
+}
+
+variable "organization_iam_bindings" {
+  description = "List of organization-level IAM role bindings"
+  type = list(object({
+    role    = string
+    members = list(string)
+  }))
+  default = []
+}
+
 variable "workload_identity_bindings" {
   description = "List of workload identity bindings"
   type = list(object({

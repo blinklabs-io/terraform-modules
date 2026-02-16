@@ -30,3 +30,14 @@ output "custom_roles" {
     }
   }
 }
+
+output "organization_iam_bindings" {
+  description = "Map of created organization IAM bindings"
+  value = {
+    for key, binding in google_organization_iam_member.iam_member : key => {
+      org_id = binding.org_id
+      role   = binding.role
+      member = binding.member
+    }
+  }
+}
