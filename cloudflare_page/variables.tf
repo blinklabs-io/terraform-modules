@@ -6,7 +6,10 @@ variable "build_command" {
   default = "npm run build"
 }
 variable "deployment_variables" {
-  type    = map(any)
+  type = map(object({
+    type  = string
+    value = string
+  }))
   default = {}
 }
 variable "destination_dir" {
@@ -24,7 +27,10 @@ variable "page_name" {
   type = string
 }
 variable "preview_deployment_variables" {
-  type    = map(any)
+  type = map(object({
+    type  = string
+    value = string
+  }))
   default = {}
 }
 variable "production_branch" {
