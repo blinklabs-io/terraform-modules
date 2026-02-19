@@ -24,12 +24,22 @@ resource "cloudflare_pages_project" "this" {
 
   deployment_configs = {
     preview = {
-      fail_open             = true
-      environment_variables = var.preview_deployment_variables != {} ? var.preview_deployment_variables : var.deployment_variables
+      fail_open = true
+      env_vars = {
+        for key, cfg in(length(var.preview_deployment_variables) > 0 ? var.preview_deployment_variables : var.deployment_variables) : key => {
+          type  = cfg.type
+          value = cfg.value
+        }
+      }
     }
     production = {
-      fail_open             = true
-      environment_variables = var.deployment_variables
+      fail_open = true
+      env_vars = {
+        for key, cfg in var.deployment_variables : key => {
+          type  = cfg.type
+          value = cfg.value
+        }
+      }
     }
   }
 }
