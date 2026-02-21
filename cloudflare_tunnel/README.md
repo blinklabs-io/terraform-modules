@@ -6,7 +6,7 @@ This module creates a Cloudflare Zero Trust Tunnel (cloudflared) with ingress ru
 
 ```hcl
 module "cloudflare_tunnel" {
-  source = "git::https://github.com/blinklabs-io/terraform-modules.git//cloudflare_tunnel?ref=cloudflare_tunnel/v0.1.0"
+  source = "git::https://github.com/blinklabs-io/terraform-modules.git?ref=cloudflare_tunnel/v0.1.0"
 
   account_id = "your-cloudflare-account-id"
   zone_id    = "your-cloudflare-zone-id"

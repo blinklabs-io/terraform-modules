@@ -6,7 +6,7 @@ Terraform module for creating Grafana alert rules from JSON files. Creates a Gra
 
 ```hcl
 module "grafana_alerts" {
-  source = "git::https://github.com/blinklabs-io/terraform-modules.git//grafana_alerts?ref=grafana_alerts/v0.1.0"
+  source = "git::https://github.com/blinklabs-io/terraform-modules.git?ref=grafana_alerts/v0.1.0"
 
   grafana_title   = "My Alerts"
   local_directory = "alerts"

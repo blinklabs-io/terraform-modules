@@ -13,7 +13,7 @@ This module provisions:
 
 ```hcl
 module "gke" {
-  source = "git::https://github.com/blinklabs-io/terraform-modules.git//gcp_gke?ref=gcp_gke/v0.1.0"
+  source = "git::https://github.com/blinklabs-io/terraform-modules.git?ref=gcp_gke/v0.1.0"
 
   cluster_name = "my-cluster"
   project      = "my-gcp-project"

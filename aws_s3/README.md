@@ -6,7 +6,7 @@ This module manages AWS S3 buckets with support for ACLs, bucket policies, and C
 
 ```hcl
 module "s3" {
-  source = "git::https://github.com/blinklabs-io/terraform-modules.git//aws_s3?ref=aws_s3/v0.1.0"
+  source = "git::https://github.com/blinklabs-io/terraform-modules.git?ref=aws_s3/v0.1.0"
 
   buckets = [
     {

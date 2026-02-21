@@ -8,7 +8,7 @@ Terraform module to create a Cloudflare ruleset with a redirect rule. The module
 
 ```hcl
 module "redirect_ruleset_zone" {
-  source = "git::https://github.com/blinklabs-io/terraform-modules.git//cloudflare_ruleset?ref=cloudflare_ruleset/v0.1.0"
+  source = "git::https://github.com/blinklabs-io/terraform-modules.git?ref=cloudflare_ruleset/v0.1.0"
 
   zone_name   = "example.com"
   name        = "old.example.com"
@@ -23,7 +23,7 @@ module "redirect_ruleset_zone" {
 
 ```hcl
 module "redirect_ruleset_zone_id" {
-  source = "git::https://github.com/blinklabs-io/terraform-modules.git//cloudflare_ruleset?ref=cloudflare_ruleset/v0.1.0"
+  source = "git::https://github.com/blinklabs-io/terraform-modules.git?ref=cloudflare_ruleset/v0.1.0"
 
   zone_id     = "your-zone-id"
   name        = "old.example.com"
@@ -38,7 +38,7 @@ module "redirect_ruleset_zone_id" {
 
 ```hcl
 module "redirect_ruleset_account" {
-  source = "git::https://github.com/blinklabs-io/terraform-modules.git//cloudflare_ruleset?ref=cloudflare_ruleset/v0.1.0"
+  source = "git::https://github.com/blinklabs-io/terraform-modules.git?ref=cloudflare_ruleset/v0.1.0"
 
   account_id  = "your-cloudflare-account-id"
   name        = "old.example.com"

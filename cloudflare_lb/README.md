@@ -6,7 +6,7 @@ Terraform module that creates a Cloudflare Load Balancer with optional pool and 
 
 ```hcl
 module "cloudflare_lb" {
-  source = "git::https://github.com/blinklabs-io/terraform-modules.git//cloudflare_lb?ref=cloudflare_lb/v0.1.0"
+  source = "git::https://github.com/blinklabs-io/terraform-modules.git?ref=cloudflare_lb/v0.1.0"
 
   name       = "app"
   account_id = "your-cloudflare-account-id"

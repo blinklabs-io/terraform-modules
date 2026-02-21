@@ -6,7 +6,7 @@ This module creates AWS KMS keys with automatic key rotation enabled. It wraps t
 
 ```hcl
 module "kms" {
-  source = "git::https://github.com/blinklabs-io/terraform-modules.git//aws_kms?ref=aws_kms/v0.1.0"
+  source = "git::https://github.com/blinklabs-io/terraform-modules.git?ref=aws_kms/v0.1.0"
 
   description = "My application encryption key"
   aliases     = ["alias/my-app-key"]

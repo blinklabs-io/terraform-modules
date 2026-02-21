@@ -6,7 +6,7 @@ This module creates a Cloudflare Pages project with GitHub integration, custom d
 
 ```hcl
 module "cloudflare_page" {
-  source = "git::https://github.com/blinklabs-io/terraform-modules.git//cloudflare_page?ref=cloudflare_page/v0.1.0"
+  source = "git::https://github.com/blinklabs-io/terraform-modules.git?ref=cloudflare_page/v0.1.0"
 
   account_id  = "your-cloudflare-account-id"
   page_name   = "my-website"
