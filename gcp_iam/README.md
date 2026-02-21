@@ -71,68 +71,68 @@ module "iam" {
 
 ## Requirements
 
-| Name | Version |
-| ------ | --------- |
+| Name      | Version       |
+| --------- | ------------- |
 | terraform | >= 1.1, < 2.0 |
-| google | ~> 6 |
+| google    | ~> 7          |
 
 ## Inputs
 
-| Name | Description | Type | Required | Default |
-| ------ | ------------- | ------ | ---------- | --------- |
-| project | Default GCP project ID | `string` | Yes | - |
-| service_accounts | List of service accounts to manage | `list(object)` | No | `[]` |
-| custom_roles | List of custom IAM roles to manage | `list(object)` | No | `[]` |
-| workload_identity_bindings | List of workload identity bindings | `list(object)` | No | `[]` |
-| organization_id | GCP organization ID for organization-level IAM bindings | `string` | No | `null` |
-| organization_iam_bindings | List of organization-level IAM role bindings | `list(object)` | No | `[]` |
+| Name                       | Description                                             | Type           | Required | Default |
+| -------------------------- | ------------------------------------------------------- | -------------- | -------- | ------- |
+| project                    | Default GCP project ID                                  | `string`       | Yes      | -       |
+| service_accounts           | List of service accounts to manage                      | `list(object)` | No       | `[]`    |
+| custom_roles               | List of custom IAM roles to manage                      | `list(object)` | No       | `[]`    |
+| workload_identity_bindings | List of workload identity bindings                      | `list(object)` | No       | `[]`    |
+| organization_id            | GCP organization ID for organization-level IAM bindings | `string`       | No       | `null`  |
+| organization_iam_bindings  | List of organization-level IAM role bindings            | `list(object)` | No       | `[]`    |
 
 ### service_accounts object
 
-| Attribute | Description | Type | Required | Default |
-| ----------- | ------------- | ------ | ---------- | --------- |
-| account_id | The service account ID | `string` | Yes | - |
-| display_name | Display name for the service account | `string` | No | `null` |
-| description | Description of the service account | `string` | No | `null` |
-| project | Project ID (overrides default) | `string` | No | `null` |
-| create_key | Whether to create a service account key | `bool` | No | `false` |
-| iam_bindings | List of IAM role bindings | `list(object)` | No | `[]` |
+| Attribute    | Description                             | Type           | Required | Default |
+| ------------ | --------------------------------------- | -------------- | -------- | ------- |
+| account_id   | The service account ID                  | `string`       | Yes      | -       |
+| display_name | Display name for the service account    | `string`       | No       | `null`  |
+| description  | Description of the service account      | `string`       | No       | `null`  |
+| project      | Project ID (overrides default)          | `string`       | No       | `null`  |
+| create_key   | Whether to create a service account key | `bool`         | No       | `false` |
+| iam_bindings | List of IAM role bindings               | `list(object)` | No       | `[]`    |
 
 #### iam_bindings nested object
 
-| Attribute | Description | Type | Required | Default |
-| ----------- | ------------- | ------ | ---------- | --------- |
-| role | IAM role to assign (e.g., "roles/storage.objectViewer") | `string` | Yes | - |
-| project | Project ID for the binding (overrides service account project) | `string` | No | `null` |
+| Attribute | Description                                                    | Type     | Required | Default |
+| --------- | -------------------------------------------------------------- | -------- | -------- | ------- |
+| role      | IAM role to assign (e.g., "roles/storage.objectViewer")        | `string` | Yes      | -       |
+| project   | Project ID for the binding (overrides service account project) | `string` | No       | `null`  |
 
 ### custom_roles object
 
-| Attribute | Description | Type | Required | Default |
-| ----------- | ------------- | ------ | ---------- | --------- |
-| role_id | The role ID | `string` | Yes | - |
-| title | Human-readable title for the role | `string` | Yes | - |
-| description | Description of the role | `string` | No | `null` |
-| permissions | List of permissions for the role | `list(string)` | Yes | - |
-| project | Project ID (overrides default) | `string` | No | `null` |
+| Attribute   | Description                       | Type           | Required | Default |
+| ----------- | --------------------------------- | -------------- | -------- | ------- |
+| role_id     | The role ID                       | `string`       | Yes      | -       |
+| title       | Human-readable title for the role | `string`       | Yes      | -       |
+| description | Description of the role           | `string`       | No       | `null`  |
+| permissions | List of permissions for the role  | `list(string)` | Yes      | -       |
+| project     | Project ID (overrides default)    | `string`       | No       | `null`  |
 
 ### workload_identity_bindings object
 
-| Attribute | Description | Type | Required | Default |
-| ----------- | ------------- | ------ | ---------- | --------- |
-| service_account_id | Service account ID (created by this module) | `string` | No* | `null` |
-| service_account_email | Service account email (external) | `string` | No* | `null` |
-| namespace | Kubernetes namespace | `string` | Yes | - |
-| k8s_service_account | Kubernetes service account name | `string` | Yes | - |
-| project | Project ID (overrides default) | `string` | No | `null` |
+| Attribute             | Description                                 | Type     | Required | Default |
+| --------------------- | ------------------------------------------- | -------- | -------- | ------- |
+| service_account_id    | Service account ID (created by this module) | `string` | No\*     | `null`  |
+| service_account_email | Service account email (external)            | `string` | No\*     | `null`  |
+| namespace             | Kubernetes namespace                        | `string` | Yes      | -       |
+| k8s_service_account   | Kubernetes service account name             | `string` | Yes      | -       |
+| project               | Project ID (overrides default)              | `string` | No       | `null`  |
 
-*Exactly one of `service_account_id` or `service_account_email` must be set.
+\*Exactly one of `service_account_id` or `service_account_email` must be set.
 
 ### organization_iam_bindings object
 
-| Attribute | Description | Type | Required | Default |
-| ----------- | ------------- | ------ | ---------- | --------- |
-| role | Full IAM role identifier | `string` | Yes | - |
-| members | List of members to bind to the role | `list(string)` | Yes | - |
+| Attribute | Description                         | Type           | Required | Default |
+| --------- | ----------------------------------- | -------------- | -------- | ------- |
+| role      | Full IAM role identifier            | `string`       | Yes      | -       |
+| members   | List of members to bind to the role | `list(string)` | Yes      | -       |
 
 **Note**:
 
@@ -144,9 +144,9 @@ module "iam" {
 
 ## Outputs
 
-| Name | Description |
-| ------ | ------------- |
-| service_accounts | Map of created service accounts with account_id, email, name, and id |
-| service_account_keys | Map of created service account keys (sensitive) |
-| custom_roles | Map of created custom IAM roles with role_id, id, and name |
+| Name                      | Description                                                            |
+| ------------------------- | ---------------------------------------------------------------------- |
+| service_accounts          | Map of created service accounts with account_id, email, name, and id   |
+| service_account_keys      | Map of created service account keys (sensitive)                        |
+| custom_roles              | Map of created custom IAM roles with role_id, id, and name             |
 | organization_iam_bindings | Map of created organization IAM bindings with org_id, role, and member |
