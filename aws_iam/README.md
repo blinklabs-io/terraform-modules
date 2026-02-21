@@ -6,7 +6,7 @@ This module manages AWS IAM users, policies, access keys, and user-policy attach
 
 ```hcl
 module "iam" {
-  source = "git::https://github.com/blinklabs-io/terraform-modules.git//aws_iam?ref=aws_iam/v0.1.0"
+  source = "git::https://github.com/blinklabs-io/terraform-modules.git?ref=aws_iam/v0.1.0"
 
   users = [
     {

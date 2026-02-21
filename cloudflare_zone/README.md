@@ -6,7 +6,7 @@ Terraform module for managing a Cloudflare zone with opinionated security settin
 
 ```hcl
 module "cloudflare_zone" {
-  source = "git::https://github.com/blinklabs-io/terraform-modules.git//cloudflare_zone?ref=cloudflare_zone/v0.1.0"
+  source = "git::https://github.com/blinklabs-io/terraform-modules.git?ref=cloudflare_zone/v0.1.0"
 
   account_id = "your-cloudflare-account-id"
   zone_name  = "example.com"

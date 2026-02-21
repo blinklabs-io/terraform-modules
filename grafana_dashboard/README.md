@@ -6,7 +6,7 @@ Creates a Grafana folder and deploys dashboards from local JSON files with optio
 
 ```hcl
 module "grafana_dashboard" {
-  source = "git::https://github.com/blinklabs-io/terraform-modules.git//grafana_dashboard?ref=grafana_dashboard/v0.1.0"
+  source = "git::https://github.com/blinklabs-io/terraform-modules.git?ref=grafana_dashboard/v0.1.0"
 
   grafana_title   = "My Dashboards"
   local_directory = "dashboards"

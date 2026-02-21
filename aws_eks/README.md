@@ -15,7 +15,7 @@ Terraform module for deploying an Amazon EKS cluster with VPC, managed node grou
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/blinklabs-io/terraform-modules.git//aws_eks?ref=aws_eks/v0.1.0"
+  source = "git::https://github.com/blinklabs-io/terraform-modules.git?ref=aws_eks/v0.1.0"
 
   cluster_name    = "my-cluster"
   cluster_version = "1.32"

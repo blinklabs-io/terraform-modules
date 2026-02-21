@@ -6,7 +6,7 @@ This module creates and validates ACM (AWS Certificate Manager) certificates usi
 
 ```hcl
 module "acm" {
-  source = "git::https://github.com/blinklabs-io/terraform-modules.git//aws_acm?ref=aws_acm/v0.1.0"
+  source = "git::https://github.com/blinklabs-io/terraform-modules.git?ref=aws_acm/v0.1.0"
 
   certificates = [
     {

@@ -14,7 +14,7 @@ Terraform module for managing GCP IAM resources including service accounts, cust
 
 ```hcl
 module "iam" {
-  source = "git::https://github.com/blinklabs-io/terraform-modules.git//gcp_iam?ref=gcp_iam/v0.1.0"
+  source = "git::https://github.com/blinklabs-io/terraform-modules.git?ref=gcp_iam/v0.1.0"
 
   project = "my-gcp-project"
 
