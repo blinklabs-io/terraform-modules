@@ -17,12 +17,16 @@ module "grafana_dashboard" {
 }
 ```
 
+Dashboard JSON files should use `${datasource_uid_map["<name>"]}` for datasource UID templating. When `datasource_uids` is empty, files are loaded as plain JSON without templating.
+
+Grafana built-in variables (e.g., `${__from}`, `${__to}`, `${__interval}`) must be escaped as `$${__from}` in JSON files to prevent Terraform's `templatefile` from interpreting them.
+
 ## Requirements
 
 | Name | Version |
 |------|---------|
-| terraform | >= 1.1, < 2.0 |
-| grafana | ~> 3 |
+| terraform | >= 1.3, < 2.0 |
+| grafana | ~> 4 |
 
 ## Inputs
 
