@@ -10,8 +10,30 @@ locals {
     for filename, parsed in local.parsed_files : {
       for idx, group in try(parsed["groups"], []) :
       "${filename}:${idx}:${group["name"]}" => group
+      if length(try(group["rules"], [])) > 0
     }
   ]...)
+
+  # Convert duration strings to seconds.
+  # Supported single-unit formats: plain integer, "Ns", "Nm", "Nh", "Nd".
+  # Composite durations such as "1h30m" are NOT supported by Terraform's
+  # expression language and will fall through to var.default_interval_seconds.
+  # If your exported Grafana JSON contains composite intervals, split them
+  # into the nearest supported single-unit value before importing.
+  rule_group_intervals = {
+    for key, group in local.rule_groups :
+    key => (
+      can(tonumber(try(group["interval"], "")))
+      ? tonumber(group["interval"])
+      : can(regex("^(\\d+)[smhd]$", try(group["interval"], "")))
+      ? tonumber(regex("^(\\d+)", group["interval"])[0]) * (
+        endswith(group["interval"], "d") ? 86400 :
+        endswith(group["interval"], "h") ? 3600 :
+        endswith(group["interval"], "m") ? 60 : 1
+      )
+      : var.default_interval_seconds
+    )
+  }
 }
 
 resource "grafana_folder" "this" {
@@ -23,7 +45,7 @@ resource "grafana_rule_group" "this" {
 
   name             = each.value["name"]
   folder_uid       = grafana_folder.this.uid
-  interval_seconds = try(each.value["interval"], var.default_interval_seconds)
+  interval_seconds = local.rule_group_intervals[each.key]
 
   dynamic "rule" {
     for_each = try(each.value["rules"], [])
