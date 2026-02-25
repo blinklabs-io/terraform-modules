@@ -50,6 +50,19 @@ module "iam" {
     }
   ]
 
+  project_iam_members = [
+    {
+      project = "my-gcp-project"
+      role    = "roles/logging.logWriter"
+      member  = "serviceAccount:external-sa@other-project.iam.gserviceaccount.com"
+    },
+    {
+      project = "my-gcp-project"
+      role    = "roles/monitoring.metricWriter"
+      member  = "group:devops@example.com"
+    }
+  ]
+
   organization_id = "123456789012"
   organization_iam_bindings = [
     {
@@ -84,6 +97,7 @@ module "iam" {
 | service_accounts           | List of service accounts to manage                      | `list(object)` | No       | `[]`    |
 | custom_roles               | List of custom IAM roles to manage                      | `list(object)` | No       | `[]`    |
 | workload_identity_bindings | List of workload identity bindings                      | `list(object)` | No       | `[]`    |
+| project_iam_members        | List of project-level IAM member bindings               | `list(object)` | No       | `[]`    |
 | organization_id            | GCP organization ID for organization-level IAM bindings | `string`       | No       | `null`  |
 | organization_iam_bindings  | List of organization-level IAM role bindings            | `list(object)` | No       | `[]`    |
 
@@ -127,6 +141,16 @@ module "iam" {
 
 \*Exactly one of `service_account_id` or `service_account_email` must be set.
 
+### project_iam_members object
+
+| Attribute | Description                    | Type     | Required | Default |
+| --------- | ------------------------------ | -------- | -------- | ------- |
+| project   | GCP project ID for the binding | `string` | Yes      | -       |
+| role      | IAM role to assign             | `string` | Yes      | -       |
+| member    | Member identity to bind        | `string` | Yes      | -       |
+
+**Note**: Members should be prefixed with their type (e.g., `user:`, `serviceAccount:`, `group:`, `domain:`).
+
 ### organization_iam_bindings object
 
 | Attribute | Description                         | Type           | Required | Default |
@@ -149,4 +173,5 @@ module "iam" {
 | service_accounts          | Map of created service accounts with account_id, email, name, and id   |
 | service_account_keys      | Map of created service account keys (sensitive)                        |
 | custom_roles              | Map of created custom IAM roles with role_id, id, and name             |
+| project_iam_bindings      | Map of created project-level IAM member bindings                       |
 | organization_iam_bindings | Map of created organization IAM bindings with org_id, role, and member |
