@@ -35,7 +35,7 @@ resource "google_project_iam_member" "service_account" {
 resource "google_project_iam_member" "project_bindings" {
   for_each = {
     for pb in var.project_iam_members :
-    "${pb.project}-${pb.role}-${pb.member}" => pb
+    "${pb.project}::${pb.role}::${pb.member}" => pb
   }
 
   project = each.value.project

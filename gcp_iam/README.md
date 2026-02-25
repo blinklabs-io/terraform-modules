@@ -50,6 +50,19 @@ module "iam" {
     }
   ]
 
+  project_iam_members = [
+    {
+      project = "my-gcp-project"
+      role    = "roles/logging.logWriter"
+      member  = "serviceAccount:external-sa@other-project.iam.gserviceaccount.com"
+    },
+    {
+      project = "my-gcp-project"
+      role    = "roles/monitoring.metricWriter"
+      member  = "group:devops@example.com"
+    }
+  ]
+
   organization_id = "123456789012"
   organization_iam_bindings = [
     {
@@ -135,6 +148,8 @@ module "iam" {
 | project   | GCP project ID for the binding | `string` | Yes      | -       |
 | role      | IAM role to assign             | `string` | Yes      | -       |
 | member    | Member identity to bind        | `string` | Yes      | -       |
+
+**Note**: Members should be prefixed with their type (e.g., `user:`, `serviceAccount:`, `group:`, `domain:`).
 
 ### organization_iam_bindings object
 
