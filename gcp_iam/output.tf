@@ -31,6 +31,17 @@ output "custom_roles" {
   }
 }
 
+output "project_iam_bindings" {
+  description = "Map of created project-level IAM member bindings"
+  value = {
+    for key, binding in google_project_iam_member.project_bindings : key => {
+      project = binding.project
+      role    = binding.role
+      member  = binding.member
+    }
+  }
+}
+
 output "organization_iam_bindings" {
   description = "Map of created organization IAM bindings"
   value = {

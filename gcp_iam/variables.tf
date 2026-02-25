@@ -46,6 +46,16 @@ variable "organization_iam_bindings" {
   default = []
 }
 
+variable "project_iam_members" {
+  description = "List of project-level IAM member bindings"
+  type = list(object({
+    project = string
+    role    = string
+    member  = string
+  }))
+  default = []
+}
+
 variable "workload_identity_bindings" {
   description = "List of workload identity bindings"
   type = list(object({
@@ -65,3 +75,4 @@ variable "workload_identity_bindings" {
     error_message = "Each workload_identity_binding must have exactly one of service_account_id or service_account_email set, not both or neither."
   }
 }
+
