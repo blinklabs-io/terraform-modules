@@ -14,6 +14,7 @@ A highly-opinionated set of Terraform modules for AWS, GCP, Cloudflare, and Graf
 
 - `gcp_gke` creates a GKE cluster with VPC, node pools, and workload identity
 - `gcp_iam` manages GCP IAM resources including service accounts, custom roles, and workload identity bindings
+- `gcp_project` creates and configures GCP projects with service enablement and optional terraform-runner service account
 
 ## Cloudflare
 
