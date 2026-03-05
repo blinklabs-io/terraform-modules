@@ -98,13 +98,29 @@ variable "enable_ula_internal_ipv6" {
 }
 
 variable "stack_type" {
-  description = "IP stack type for the subnetwork (IPV4_ONLY or IPV4_IPV6)."
+  description = "IP stack type for the subnetwork (IPV4_ONLY, IPV4_IPV6, or IPV6_ONLY)."
   type        = string
   default     = "IPV4_ONLY"
 
   validation {
-    condition     = contains(["IPV4_ONLY", "IPV4_IPV6"], var.stack_type)
-    error_message = "stack_type must be IPV4_ONLY or IPV4_IPV6."
+    condition     = contains(["IPV4_ONLY", "IPV4_IPV6", "IPV6_ONLY"], var.stack_type)
+    error_message = "stack_type must be IPV4_ONLY, IPV4_IPV6, or IPV6_ONLY."
+  }
+}
+
+variable "cluster_stack_type" {
+  description = "IP stack type for the GKE cluster (IPV4 or IPV4_IPV6)."
+  type        = string
+  default     = "IPV4"
+
+  validation {
+    condition     = contains(["IPV4", "IPV4_IPV6"], var.cluster_stack_type)
+    error_message = "cluster_stack_type must be IPV4 or IPV4_IPV6."
+  }
+
+  validation {
+    condition     = var.cluster_stack_type != "IPV4_IPV6" || contains(["IPV4_IPV6", "IPV6_ONLY"], var.stack_type)
+    error_message = "cluster_stack_type IPV4_IPV6 requires stack_type IPV4_IPV6 or IPV6_ONLY."
   }
 }
 
@@ -119,8 +135,8 @@ variable "ipv6_access_type" {
   }
 
   validation {
-    condition     = (var.stack_type == "IPV4_IPV6") == (var.ipv6_access_type != null)
-    error_message = "ipv6_access_type must be set when stack_type is IPV4_IPV6, and must be null for all other stack types."
+    condition     = contains(["IPV4_IPV6", "IPV6_ONLY"], var.stack_type) == (var.ipv6_access_type != null)
+    error_message = "ipv6_access_type must be set when stack_type is IPV4_IPV6 or IPV6_ONLY, and must be null for IPV4_ONLY."
   }
 }
 

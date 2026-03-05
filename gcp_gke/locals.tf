@@ -6,6 +6,4 @@ locals {
 
   node_sa_email = (var.node_service_account != null && var.node_service_account != "") ? var.node_service_account : google_service_account.node["this"].email
 
-  # GKE ip_allocation_policy.stack_type uses "IPV4" where the subnet resource uses "IPV4_ONLY"
-  cluster_stack_type = var.stack_type == "IPV4_IPV6" ? "IPV4_IPV6" : "IPV4"
 }

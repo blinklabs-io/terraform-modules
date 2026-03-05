@@ -71,18 +71,19 @@ module "gke" {
 
 ### Network
 
-| Name                     | Description                                                                           | Type     | Required | Default             |
-| ------------------------ | ------------------------------------------------------------------------------------- | -------- | -------- | ------------------- |
-| vpc_cidr                 | Primary CIDR block for the subnetwork                                                 | `string` | Yes      | —                   |
-| pod_cidr                 | Secondary CIDR range for pods                                                         | `string` | No       | `"192.168.16.0/20"` |
-| services_cidr            | Secondary CIDR range for services                                                     | `string` | No       | `"192.168.0.0/20"`  |
-| vpc_name                 | VPC network name. Defaults to `{cluster_name}-vpc`                                    | `string` | No       | `null`              |
-| subnet_name              | Subnetwork name. Defaults to `{cluster_name}-subnet`                                  | `string` | No       | `null`              |
-| pod_range_name           | Secondary range name for pods. Defaults to `{cluster_name}-pod-range`                 | `string` | No       | `null`              |
-| services_range_name      | Secondary range name for services. Defaults to `{cluster_name}-services-range`        | `string` | No       | `null`              |
-| enable_ula_internal_ipv6 | Enable ULA internal IPv6 on the VPC                                                   | `bool`   | No       | `false`             |
-| stack_type               | IP stack type (`IPV4_ONLY` or `IPV4_IPV6`)                                            | `string` | No       | `"IPV4_ONLY"`       |
-| ipv6_access_type         | IPv6 access type (`INTERNAL` or `EXTERNAL`). Required when `stack_type = "IPV4_IPV6"` | `string` | No       | `null`              |
+| Name                     | Description                                                                                       | Type     | Required | Default             |
+| ------------------------ | ------------------------------------------------------------------------------------------------- | -------- | -------- | ------------------- |
+| vpc_cidr                 | Primary CIDR block for the subnetwork                                                             | `string` | Yes      | —                   |
+| pod_cidr                 | Secondary CIDR range for pods                                                                     | `string` | No       | `"192.168.16.0/20"` |
+| services_cidr            | Secondary CIDR range for services                                                                 | `string` | No       | `"192.168.0.0/20"`  |
+| vpc_name                 | VPC network name. Defaults to `{cluster_name}-vpc`                                                | `string` | No       | `null`              |
+| subnet_name              | Subnetwork name. Defaults to `{cluster_name}-subnet`                                              | `string` | No       | `null`              |
+| pod_range_name           | Secondary range name for pods. Defaults to `{cluster_name}-pod-range`                             | `string` | No       | `null`              |
+| services_range_name      | Secondary range name for services. Defaults to `{cluster_name}-services-range`                    | `string` | No       | `null`              |
+| enable_ula_internal_ipv6 | Enable ULA internal IPv6 on the VPC                                                               | `bool`   | No       | `false`             |
+| stack_type               | Subnet IP stack type (`IPV4_ONLY`, `IPV4_IPV6`, or `IPV6_ONLY`)                                   | `string` | No       | `"IPV4_ONLY"`       |
+| cluster_stack_type       | Cluster IP stack type (`IPV4` or `IPV4_IPV6`). `IPV4_IPV6` requires `stack_type` to be dual-stack | `string` | No       | `"IPV4"`            |
+| ipv6_access_type         | IPv6 access type (`INTERNAL` or `EXTERNAL`). Required when `stack_type` includes IPv6             | `string` | No       | `null`              |
 
 ### Node Service Account
 

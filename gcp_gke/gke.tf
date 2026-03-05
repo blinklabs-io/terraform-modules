@@ -15,7 +15,7 @@ module "gke" {
   subnetwork        = google_compute_subnetwork.this.name
   ip_range_pods     = local.pod_range_name
   ip_range_services = local.services_range_name
-  stack_type        = local.cluster_stack_type
+  stack_type        = var.cluster_stack_type
 
   # Node service account — externally managed, do not create
   create_service_account = false
