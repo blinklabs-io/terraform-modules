@@ -153,6 +153,8 @@ variable "node_pools" {
     disk_size_gb       = optional(number, 100)
     disk_type          = optional(string, "pd-balanced")
     image_type         = optional(string, "COS_CONTAINERD")
+    auto_repair        = optional(bool, true)
+    auto_upgrade       = optional(bool, true)
     preemptible        = optional(bool, false)
     spot               = optional(bool, false)
     labels             = optional(map(string), {})

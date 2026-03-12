@@ -57,8 +57,8 @@ module "gke" {
       disk_size_gb       = np.disk_size_gb
       disk_type          = np.disk_type
       image_type         = np.image_type
-      auto_repair        = true
-      auto_upgrade       = true
+      auto_repair        = np.auto_repair
+      auto_upgrade       = np.auto_upgrade
       service_account    = local.node_sa_email
       preemptible        = np.preemptible
       spot               = np.spot
