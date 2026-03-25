@@ -22,7 +22,8 @@ variable "public_subnets" {
   type    = list(string)
 }
 variable "tags" {
-  default = []
+  type    = map(string)
+  default = {}
 }
 variable "node_groups" {
   default = {}
