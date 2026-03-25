@@ -27,3 +27,8 @@ variable "tags" {
 variable "node_groups" {
   default = {}
 }
+variable "enable_external_dns" {
+  description = "Whether to create an IRSA role for external-dns"
+  type        = bool
+  default     = false
+}

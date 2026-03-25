@@ -9,6 +9,7 @@ Terraform module for deploying an Amazon EKS cluster with VPC, managed node grou
 - Configures essential EKS addons (CoreDNS, kube-proxy, VPC CNI, EBS CSI driver, Pod Identity Agent)
 - Sets up IRSA for EBS CSI driver and AWS Load Balancer Controller
 - Enables IRSA (IAM Roles for Service Accounts)
+- Optional IRSA role for external-dns (behind `enable_external_dns` flag)
 - Encrypts node root volumes with AWS KMS
 
 ## Usage
@@ -33,6 +34,8 @@ module "eks" {
       desired_size  = 1
     }
   }
+
+  enable_external_dns = true
 
   tags = {
     Environment = "production"
@@ -59,6 +62,7 @@ module "eks" {
 | public_subnets | List of public subnet CIDR blocks | `list(string)` | No | `["10.10.0.0/20", "10.10.16.0/20", "10.10.32.0/20"]` |
 | tags | Tags to apply to all resources | `any` | No | `[]` |
 | node_groups | Map of EKS managed node group configurations | `any` | No | `{}` |
+| enable_external_dns | Whether to create an IRSA role for external-dns | `bool` | No | `false` |
 
 ### Node Group Configuration
 
@@ -81,3 +85,9 @@ Each node group in the `node_groups` map supports the following attributes:
 | Name | Description |
 |------|-------------|
 | vpc | VPC module outputs (vpc_id, public_subnets, private_subnets, etc.) |
+| cluster_name | Name of the EKS cluster |
+| cluster_endpoint | Endpoint for the EKS cluster API server |
+| cluster_certificate_authority_data | Base64 encoded certificate data for the cluster |
+| oidc_provider_arn | ARN of the OIDC provider for IRSA |
+| oidc_provider | The OIDC provider URL (without protocol) |
+| external_dns_iam_role_arn | IAM role ARN for external-dns (null if disabled) |
