@@ -23,5 +23,5 @@ output "oidc_provider" {
 }
 
 output "external_dns_iam_role_arn" {
-  value = var.enable_external_dns ? module.external_dns_irsa[0].iam_role_arn : null
+  value = var.enable_external_dns ? module.external_dns_irsa[0].arn : null
 }
