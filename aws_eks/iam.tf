@@ -38,5 +38,5 @@ module "external_dns_irsa" {
   }
 
   external_dns_hosted_zone_arns = ["*"]
-  tags = var.tags
+  tags                          = var.tags
 }
