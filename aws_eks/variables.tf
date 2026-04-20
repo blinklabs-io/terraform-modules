@@ -33,3 +33,9 @@ variable "enable_external_dns" {
   type        = bool
   default     = false
 }
+
+variable "external_dns_hosted_zone_arns" {
+  description = "Route53 hosted zone ARNs to allow External DNS to manage records"
+  type        = list(string)
+  default     = []
+}
