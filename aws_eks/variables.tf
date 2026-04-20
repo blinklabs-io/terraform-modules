@@ -38,4 +38,9 @@ variable "external_dns_hosted_zone_arns" {
   description = "Route53 hosted zone ARNs to allow External DNS to manage records"
   type        = list(string)
   default     = []
+
+  validation {
+    condition     = !(var.enable_external_dns) || length(var.external_dns_hosted_zone_arns) > 0
+    error_message = "If enable_external_dns is true, you must provide at least one hosted zone ARN in external_dns_hosted_zone_arns."
+  }
 }
