@@ -27,7 +27,6 @@ module "cloudflare_d1" {
 | account_id | Cloudflare account ID | `string` | Yes | - |
 | name | Name of the D1 database | `string` | Yes | - |
 | primary_location_hint | Primary location hint for the database (e.g. `wnam`, `enam`, `weur`, `eeur`, `apac`, `oc`) | `string` | No | `null` |
-| read_replication_mode | Read replication mode (`auto` or `disabled`) | `string` | No | `null` |
 
 ## Outputs
 
