@@ -13,5 +13,7 @@ variable "read_replication" {
   type = object({
     mode = string
   })
-  default = null
+  default = {
+    mode = "disabled"
+  }
 }
