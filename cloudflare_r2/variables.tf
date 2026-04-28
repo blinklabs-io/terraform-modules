@@ -14,8 +14,3 @@ variable "storage_class" {
   type        = string
   default     = "Standard"
 }
-variable "jurisdiction" {
-  description = "Jurisdiction for the R2 bucket. One of `default`, `eu`, or `fedramp`."
-  type        = string
-  default     = "default"
-}

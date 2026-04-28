@@ -28,7 +28,6 @@ module "cloudflare_r2" {
 | name | Name of the R2 bucket | `string` | Yes | - |
 | location | Location hint for the bucket (e.g. `apac`, `eeur`, `enam`, `weur`, `wnam`) | `string` | No | `null` |
 | storage_class | Storage class for the bucket. One of `Standard` or `InfrequentAccess` | `string` | No | `"Standard"` |
-| jurisdiction | Jurisdiction for the bucket. One of `default`, `eu`, or `fedramp` | `string` | No | `"default"` |
 
 ## Outputs
 
@@ -36,5 +35,4 @@ module "cloudflare_r2" {
 |------|-------------|
 | name | The name of the R2 bucket |
 | location | The location of the R2 bucket |
-| jurisdiction | The jurisdiction of the R2 bucket |
 | storage_class | The storage class of the R2 bucket |
