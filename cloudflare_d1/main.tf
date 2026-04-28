@@ -2,4 +2,5 @@ resource "cloudflare_d1_database" "this" {
   account_id            = var.account_id
   name                  = var.name
   primary_location_hint = var.primary_location_hint
+  read_replication      = var.read_replication
 }
