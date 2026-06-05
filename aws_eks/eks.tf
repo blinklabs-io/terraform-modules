@@ -54,9 +54,12 @@ module "eks" {
       name                 = "${var.cluster_name}-${ng_name}"
       launch_template_name = "${var.cluster_name}-${ng_name}-lt"
       ami_type             = try(ng_conf.ami_type, "AL2023_ARM_64_STANDARD")
-      instance_type        = try(ng_conf.instance_type, "t4g.medium")
-      min_size             = try(ng_conf.min_size, 0)
-      max_size             = try(ng_conf.max_size, 2)
+      # instance_types is a list in terraform-aws-modules/eks ~> 21.0; using the
+      # singular instance_type key is silently ignored. Wrap the configured value
+      # in a list so the node group instance type is actually applied.
+      instance_types = [try(ng_conf.instance_type, "t4g.medium")]
+      min_size       = try(ng_conf.min_size, 0)
+      max_size       = try(ng_conf.max_size, 2)
       desired_size = min(
         try(ng_conf.max_size, 2),
         try(ng_conf.desired_size, 0),
