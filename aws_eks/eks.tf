@@ -19,6 +19,12 @@ module "eks" {
     aws-ebs-csi-driver = {
       most_recent              = true
       service_account_role_arn = module.ebs_csi_driver_irsa.arn
+      # Single node clusters don't need 2 controller replicas
+      configuration_values = jsonencode({
+        controller = {
+          replicaCount = 1
+        }
+      })
     }
     coredns = {
       addon_version     = "v1.11.4-eksbuild.2"
