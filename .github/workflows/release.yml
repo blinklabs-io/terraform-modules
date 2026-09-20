@@ -18,7 +18,7 @@ jobs:
         with:
           fetch-depth: 0  # Full history needed for changelog generation
 
-      - uses: techpivot/terraform-module-releaser@5f3fc036202008b9a2d3ab5dbb1e4a734cd90e4d  # v2.2.0
+      - uses: techpivot/terraform-module-releaser@b5df513373777916d19dd842bf0b2b7461e7cf8f  # v2.2.1
         with:
           major-keywords: 'BREAKING CHANGE,breaking change,!:'
           minor-keywords: 'feat,feature'
