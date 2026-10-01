@@ -57,3 +57,8 @@ jobs:
       - name: Terraform Validate
         working-directory: ${{ matrix.module }}
         run: terraform validate
+
+      - name: Test Grafana alert pause behavior
+        if: matrix.module == 'grafana_alerts'
+        working-directory: grafana_alerts
+        run: terraform test -no-color
