@@ -40,6 +40,7 @@ module "cloudflare_page" {
 | deployment_variables | Environment variables for production (and preview if preview_deployment_variables is not set) | `map(any)` | No | `{}` |
 | destination_dir | Output directory for built assets | `string` | No | `"out"` |
 | domains | List of custom domains to attach to the Pages project | `list(string)` | No | `[]` |
+| fail_open | Whether requests bypass Pages Functions when their daily request limit is exhausted | `bool` | No | `true` |
 | owner | GitHub repository owner | `string` | Yes | - |
 | page_name | Name of the Cloudflare Pages project | `string` | Yes | - |
 | preview_deployment_variables | Environment variables for preview deployments | `map(any)` | No | `{}` |

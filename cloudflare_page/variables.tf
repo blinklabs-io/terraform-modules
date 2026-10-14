@@ -16,6 +16,12 @@ variable "destination_dir" {
   type    = string
   default = "out"
 }
+variable "fail_open" {
+  description = "Whether requests bypass Pages Functions when their daily request limit is exhausted. Disable for functions that must validate requests."
+  type        = bool
+  default     = true
+  nullable    = false
+}
 variable "domains" {
   type    = list(string)
   default = []

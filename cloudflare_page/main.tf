@@ -24,7 +24,7 @@ resource "cloudflare_pages_project" "this" {
 
   deployment_configs = {
     preview = {
-      fail_open = true
+      fail_open = var.fail_open
       env_vars = {
         for key, cfg in(length(var.preview_deployment_variables) > 0 ? var.preview_deployment_variables : var.deployment_variables) : key => {
           type  = cfg.type
@@ -33,7 +33,7 @@ resource "cloudflare_pages_project" "this" {
       }
     }
     production = {
-      fail_open = true
+      fail_open = var.fail_open
       env_vars = {
         for key, cfg in var.deployment_variables : key => {
           type  = cfg.type
