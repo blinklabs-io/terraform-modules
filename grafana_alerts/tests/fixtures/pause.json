@@ -1,0 +1,47 @@
+{
+  "groups": [
+    {
+      "name": "Pause behavior",
+      "rules": [
+        {
+          "title": "Paused rule",
+          "condition": "A",
+          "isPaused": true,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "__expr__",
+              "relativeTimeRange": { "from": 0, "to": 0 },
+              "model": { "type": "math", "expression": "1" }
+            }
+          ]
+        },
+        {
+          "title": "Active rule",
+          "condition": "A",
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "__expr__",
+              "relativeTimeRange": { "from": 0, "to": 0 },
+              "model": { "type": "math", "expression": "1" }
+            }
+          ]
+        },
+        {
+          "title": "Default rule",
+          "condition": "A",
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "__expr__",
+              "relativeTimeRange": { "from": 0, "to": 0 },
+              "model": { "type": "math", "expression": "1" }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

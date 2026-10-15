@@ -54,6 +54,7 @@ resource "grafana_rule_group" "this" {
       name      = rule.value["title"]
       condition = rule.value["condition"]
       for       = try(rule.value["for"], "0s")
+      is_paused = try(rule.value["isPaused"], false)
       dynamic "data" {
         for_each = try(rule.value["data"], [])
         content {

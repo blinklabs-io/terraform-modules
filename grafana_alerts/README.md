@@ -46,6 +46,11 @@ Each JSON file may contain multiple groups. Each group becomes a separate `grafa
 
 If a group omits `interval`, it falls back to `default_interval_seconds`.
 
+### Paused rules
+
+Set `isPaused` to `true` on a rule to pause its evaluation. Set it to `false`
+to resume evaluation. Rules that omit `isPaused` remain enabled by default.
+
 ### Notification settings
 
 Rules may optionally include a `notification_settings` object to configure simplified notification routing. This requires **Grafana >= 10.4** with the `alertingSimplifiedRouting` feature flag enabled.
