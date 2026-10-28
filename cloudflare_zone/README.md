@@ -2,6 +2,8 @@
 
 Terraform module for managing a Cloudflare zone with opinionated security settings and DNS records. Creates a zone with HTTPS enforcement, TLS 1.2+, HSTS headers, and optimized caching settings. Supports A, CNAME, MX, and TXT DNS records.
 
+Enhanced HTTP/2 Prioritization, Mirage, and WebP settings are managed only on paid plans.
+
 ## Usage
 
 ```hcl
