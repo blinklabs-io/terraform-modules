@@ -14,7 +14,7 @@ locals {
     browser_cache_ttl        = var.plan == "free" ? 300 : 14400
     cache_level              = var.plan == "free" ? "basic" : "aggressive"
     early_hints              = "on"
-    h2_prioritization        = "on"
+    h2_prioritization        = var.plan == "free" ? null : "on"
     http3                    = "on"
     min_tls_version          = "1.2"
     mirage                   = var.plan == "free" ? null : "on"
