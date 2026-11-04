@@ -49,9 +49,10 @@ If a group omits `interval`, it falls back to `default_interval_seconds`.
 ### Paused rules
 
 Set `isPaused` to `true` on a rule to pause its evaluation. Set it to `false`
-to resume evaluation. Rules that omit `isPaused` default to active. Terraform
-enforces the configured value on apply, overriding manual pauses made in Grafana.
-Set `isPaused` to `true` in the JSON to keep a rule paused.
+to resume evaluation. Rules that omit `isPaused` default to active. Grafana
+normally prevents editing Terraform-provisioned rules in its UI. If a rule is
+changed outside Terraform, a subsequent plan and apply can restore the value
+from the JSON. Set `isPaused` to `true` in the JSON to keep a rule paused.
 
 ### Notification settings
 
