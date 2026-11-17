@@ -52,3 +52,12 @@ output "organization_iam_bindings" {
     }
   }
 }
+
+output "workload_identity_pool_providers" {
+  description = "Map of created workload identity pool providers with their full resource name, which clients exchanging external tokens reference"
+  value = {
+    for key, provider in google_iam_workload_identity_pool_provider.this : key => {
+      name = provider.name
+    }
+  }
+}

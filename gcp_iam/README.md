@@ -8,6 +8,7 @@ Terraform module for managing GCP IAM resources including service accounts, cust
 - Assign IAM roles to service accounts across projects
 - Create custom IAM roles with specific permissions
 - Configure workload identity bindings for Kubernetes service accounts
+- Create workload identity pools and OIDC providers, and let their principals impersonate service accounts (for example, CI systems such as GitHub Actions, or workloads in another cloud, without service account keys)
 - Manage organization-level IAM role bindings
 
 ## Usage
@@ -82,6 +83,52 @@ module "iam" {
 }
 ```
 
+### Workload identity federation
+
+```hcl
+module "iam" {
+  source = "git::https://github.com/blinklabs-io/terraform-modules.git?ref=gcp_iam/v0.4.0"
+
+  project = "my-gcp-project"
+
+  service_accounts = [
+    {
+      account_id   = "external-deployer"
+      iam_bindings = [{ role = "roles/container.clusterViewer" }]
+    }
+  ]
+
+  workload_identity_pools = [
+    {
+      pool_id = "external"
+      providers = [
+        {
+          provider_id = "example-oidc"
+          issuer_uri  = "https://oidc.example.com"
+          attribute_mapping = {
+            "google.subject" = "assertion.sub"
+            "attribute.team" = "assertion.team"
+          }
+          attribute_condition = "assertion.team == 'platform'"
+        }
+      ]
+    }
+  ]
+
+  workload_identity_pool_bindings = [
+    {
+      service_account_id = "external-deployer"
+      pool_id            = "external"
+      attribute          = "subject"
+      value              = "deploy:production"
+    }
+  ]
+}
+```
+
+The `name` in the `workload_identity_pool_providers` output is the full
+provider resource name that identifies the provider in a token exchange.
+
 ## Requirements
 
 | Name      | Version       |
@@ -100,6 +147,8 @@ module "iam" {
 | project_iam_members        | List of project-level IAM member bindings               | `list(object)` | No       | `[]`    |
 | organization_id            | GCP organization ID for organization-level IAM bindings | `string`       | No       | `null`  |
 | organization_iam_bindings  | List of organization-level IAM role bindings            | `list(object)` | No       | `[]`    |
+| workload_identity_pools    | Workload identity pools with OIDC providers             | `list(object)` | No       | `[]`    |
+| workload_identity_pool_bindings | Service account impersonation grants for pool principals | `list(object)` | No | `[]` |
 
 ### service_accounts object
 
@@ -141,6 +190,52 @@ module "iam" {
 
 \*Exactly one of `service_account_id` or `service_account_email` must be set.
 
+### workload_identity_pools object
+
+| Attribute    | Description                     | Type           | Required | Default |
+| ------------ | ------------------------------- | -------------- | -------- | ------- |
+| pool_id      | Workload identity pool ID       | `string`       | Yes      | -       |
+| display_name | Display name for the pool       | `string`       | No       | `null`  |
+| description  | Description of the pool         | `string`       | No       | `null`  |
+| project      | Project ID (overrides default)  | `string`       | No       | `null`  |
+| disabled     | Whether the pool is disabled    | `bool`         | No       | `false` |
+| providers    | OIDC providers in the pool      | `list(object)` | No       | `[]`    |
+
+#### providers nested object
+
+| Attribute           | Description                                                  | Type           | Required | Default |
+| ------------------- | ------------------------------------------------------------ | -------------- | -------- | ------- |
+| provider_id         | Provider ID                                                  | `string`       | Yes      | -       |
+| display_name        | Display name for the provider                                | `string`       | No       | `null`  |
+| description         | Description of the provider                                  | `string`       | No       | `null`  |
+| issuer_uri          | OIDC issuer URI                                              | `string`       | Yes      | -       |
+| allowed_audiences   | Accepted token audiences; empty accepts the provider's default | `list(string)` | No     | `[]`    |
+| attribute_mapping   | Map of Google attributes to token assertions                 | `map(string)`  | Yes      | -       |
+| attribute_condition | CEL condition a token must satisfy; must not be empty        | `string`       | Yes      | -       |
+
+**Note**: A provider without an attribute condition accepts every token from its
+issuer. For a shared public issuer, such as a hosted CI service, that is every
+one of its users, so the module rejects an empty condition.
+
+### workload_identity_pool_bindings object
+
+| Attribute             | Description                                          | Type     | Required | Default |
+| --------------------- | ---------------------------------------------------- | -------- | -------- | ------- |
+| service_account_id    | Service account ID (created by this module)          | `string` | No\*     | `null`  |
+| service_account_email | Service account email (external)                     | `string` | No\*     | `null`  |
+| project               | Project ID (overrides default)                       | `string` | No       | `null`  |
+| pool_id               | Pool ID (created by this module)                     | `string` | Yes      | -       |
+| attribute             | `subject`, `group`, or `attribute.<name>`\*\*        | `string` | Yes      | -       |
+| value                 | Value that selects the principal or principal set    | `string` | Yes      | -       |
+
+\*Exactly one of `service_account_id` or `service_account_email` must be set.
+
+\*\*`<name>` is 1-100 lowercase letters, digits, or underscores, and must be
+mapped by the provider's `attribute_mapping`.
+
+`subject` grants a single principal; any other attribute grants every principal
+whose mapped attribute has that value.
+
 ### project_iam_members object
 
 | Attribute | Description                    | Type     | Required | Default |
@@ -175,3 +270,4 @@ module "iam" {
 | custom_roles              | Map of created custom IAM roles with role_id, id, and name             |
 | project_iam_bindings      | Map of created project-level IAM member bindings                       |
 | organization_iam_bindings | Map of created organization IAM bindings with org_id, role, and member |
+| workload_identity_pool_providers | Map of created workload identity pool providers with their full resource name |

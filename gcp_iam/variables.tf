@@ -76,3 +76,61 @@ variable "workload_identity_bindings" {
   }
 }
 
+variable "workload_identity_pools" {
+  description = "Workload identity pools with OIDC providers for external identities"
+  type = list(object({
+    pool_id      = string
+    display_name = optional(string)
+    description  = optional(string)
+    project      = optional(string)
+    disabled     = optional(bool, false)
+    providers = optional(list(object({
+      provider_id         = string
+      display_name        = optional(string)
+      description         = optional(string)
+      issuer_uri          = string
+      allowed_audiences   = optional(list(string), [])
+      attribute_mapping   = map(string)
+      attribute_condition = string
+    })), [])
+  }))
+  default = []
+
+  validation {
+    condition = alltrue(flatten([
+      for p in var.workload_identity_pools : [
+        for pr in p.providers : try(trimspace(pr.attribute_condition), "") != ""
+      ]
+    ]))
+    error_message = "Each workload identity provider must set attribute_condition; without one, any identity from the issuer can authenticate."
+  }
+}
+
+variable "workload_identity_pool_bindings" {
+  description = "Grants roles/iam.workloadIdentityUser on a service account to principals from a workload identity pool, selected by subject or by a mapped attribute"
+  type = list(object({
+    service_account_id    = optional(string)
+    service_account_email = optional(string)
+    project               = optional(string)
+    pool_id               = string
+    attribute             = string
+    value                 = string
+  }))
+  default = []
+
+  validation {
+    condition = alltrue([
+      for b in var.workload_identity_pool_bindings :
+      (b.service_account_id == null) != (b.service_account_email == null)
+    ])
+    error_message = "Each workload_identity_pool_binding must have exactly one of service_account_id or service_account_email set, not both or neither."
+  }
+
+  validation {
+    condition = alltrue([
+      for b in var.workload_identity_pool_bindings :
+      can(regex("^(subject|group|attribute\\.[a-z0-9_]{1,100})$", b.attribute))
+    ])
+    error_message = "attribute must be subject, group, or attribute.<name>, where name is 1-100 lowercase letters, digits, or underscores."
+  }
+}
