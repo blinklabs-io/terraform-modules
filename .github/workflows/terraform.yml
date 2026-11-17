@@ -62,3 +62,8 @@ jobs:
         if: matrix.module == 'grafana_alerts'
         working-directory: grafana_alerts
         run: terraform test -no-color
+
+      - name: Test GCP IAM workload identity federation
+        if: matrix.module == 'gcp_iam'
+        working-directory: gcp_iam
+        run: terraform test -no-color
