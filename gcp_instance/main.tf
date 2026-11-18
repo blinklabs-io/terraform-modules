@@ -1,11 +1,13 @@
 locals {
   region       = join("-", slice(split("-", var.zone), 0, 2))
   confidential = var.confidential_instance_type != null
+  spot         = var.spot == true
 
-  # Confidential and Spot VMs cannot live-migrate, so GCP requires TERMINATE.
-  # The scheduling block is only rendered when one of them is requested, so
-  # existing instances keep the provider-computed scheduling and show no diff.
-  custom_scheduling = local.confidential || var.spot
+  # scheduling is Optional+Computed in the provider: omitting the block keeps
+  # whatever the instance already has, so spot = false must render it to move
+  # a Spot VM back to STANDARD. With spot = null and no confidential type the
+  # block stays omitted and existing instances show no diff.
+  custom_scheduling = local.confidential || var.spot != null
 }
 
 resource "google_compute_network" "this" {
@@ -108,11 +110,12 @@ resource "google_compute_instance" "this" {
   dynamic "scheduling" {
     for_each = local.custom_scheduling ? [1] : []
     content {
-      provisioning_model          = var.spot ? "SPOT" : "STANDARD"
-      preemptible                 = var.spot
-      automatic_restart           = !var.spot
-      on_host_maintenance         = "TERMINATE"
-      instance_termination_action = var.spot ? var.instance_termination_action : null
+      provisioning_model = local.spot ? "SPOT" : "STANDARD"
+      preemptible        = local.spot
+      automatic_restart  = !local.spot
+      # Confidential and Spot VMs cannot live-migrate, so GCP requires TERMINATE.
+      on_host_maintenance         = local.confidential || local.spot ? "TERMINATE" : "MIGRATE"
+      instance_termination_action = local.spot ? var.instance_termination_action : null
     }
   }
 

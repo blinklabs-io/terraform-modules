@@ -101,9 +101,9 @@ variable "shielded_instance_config" {
 }
 
 variable "spot" {
-  description = "Run the instance as a Spot VM (preemptible, no automatic restart). Enabling it replaces the instance. Disabling it also replaces the instance when confidential_instance_type is set; otherwise the scheduling block is omitted and the instance stays Spot."
+  description = "Provisioning model. null leaves scheduling unmanaged (keeps the instance's current setting) unless confidential_instance_type is set; true runs a Spot VM (preemptible, no automatic restart); false sets STANDARD scheduling explicitly. Switching between Spot and STANDARD replaces the instance."
   type        = bool
-  default     = false
+  default     = null
 }
 
 variable "instance_termination_action" {
