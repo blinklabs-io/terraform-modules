@@ -1,0 +1,87 @@
+variable "project" {
+  description = "GCP project ID that owns the key ring"
+  type        = string
+}
+
+variable "location" {
+  description = "Location of the key ring, such as a region, a multi-region like us, or global. Cannot be changed after creation"
+  type        = string
+}
+
+variable "name" {
+  description = "Name of the key ring. Key rings cannot be deleted from GCP, so the name is permanently reserved in the project and location"
+  type        = string
+
+  validation {
+    condition     = can(regex("^[a-zA-Z0-9_-]{1,63}$", var.name))
+    error_message = "name must be 1-63 letters, digits, underscores, or hyphens."
+  }
+}
+
+variable "keys" {
+  description = <<-EOT
+    Crypto keys to create in the key ring, keyed by key name.
+    purpose is ENCRYPT_DECRYPT, ASYMMETRIC_SIGN, ASYMMETRIC_DECRYPT, RAW_ENCRYPT_DECRYPT, or MAC.
+    rotation_period is a duration in seconds such as 7776000s, valid only for ENCRYPT_DECRYPT keys; null disables automatic rotation.
+    version_template sets the algorithm and protection_level (SOFTWARE, HSM, EXTERNAL, or EXTERNAL_VPC) of new versions and is required for every purpose except ENCRYPT_DECRYPT.
+    destroy_scheduled_duration is how long a destroyed key version stays recoverable, in seconds such as 2592000s; it cannot be changed after the key is created.
+    iam_members maps a role to the members granted that role on the key, additively. Members are any IAM principal string, including principalSet:// and principal:// workload identity values, and must be known at plan time.
+  EOT
+  type = map(object({
+    purpose         = optional(string, "ENCRYPT_DECRYPT")
+    rotation_period = optional(string)
+    version_template = optional(object({
+      algorithm        = string
+      protection_level = optional(string, "SOFTWARE")
+    }))
+    destroy_scheduled_duration = optional(string)
+    labels                     = optional(map(string), {})
+    iam_members                = optional(map(list(string)), {})
+  }))
+  default = {}
+
+  validation {
+    condition     = alltrue([for k in keys(var.keys) : can(regex("^[a-zA-Z0-9_-]{1,63}$", k))])
+    error_message = "keys names must be 1-63 letters, digits, underscores, or hyphens."
+  }
+
+  validation {
+    condition = alltrue([
+      for k in values(var.keys) :
+      contains(["ENCRYPT_DECRYPT", "ASYMMETRIC_SIGN", "ASYMMETRIC_DECRYPT", "RAW_ENCRYPT_DECRYPT", "MAC"], k.purpose)
+    ])
+    error_message = "keys purpose must be ENCRYPT_DECRYPT, ASYMMETRIC_SIGN, ASYMMETRIC_DECRYPT, RAW_ENCRYPT_DECRYPT, or MAC."
+  }
+
+  validation {
+    condition = alltrue([
+      for k in values(var.keys) :
+      k.rotation_period == null || (can(regex("^[0-9]+s$", k.rotation_period)) && k.purpose == "ENCRYPT_DECRYPT")
+    ])
+    error_message = "keys rotation_period must be null or a number of seconds ending in s, for example 7776000s, and is only valid for ENCRYPT_DECRYPT keys."
+  }
+
+  validation {
+    condition = alltrue([
+      for k in values(var.keys) :
+      k.version_template != null || k.purpose == "ENCRYPT_DECRYPT"
+    ])
+    error_message = "keys version_template is required for every purpose except ENCRYPT_DECRYPT."
+  }
+
+  validation {
+    condition = alltrue([
+      for k in values(var.keys) :
+      k.version_template == null || contains(["SOFTWARE", "HSM", "EXTERNAL", "EXTERNAL_VPC"], k.version_template.protection_level)
+    ])
+    error_message = "keys version_template protection_level must be SOFTWARE, HSM, EXTERNAL, or EXTERNAL_VPC."
+  }
+
+  validation {
+    condition = alltrue([
+      for k in values(var.keys) :
+      k.destroy_scheduled_duration == null || can(regex("^[0-9]+s$", k.destroy_scheduled_duration))
+    ])
+    error_message = "keys destroy_scheduled_duration must be null or a number of seconds ending in s, for example 2592000s."
+  }
+}
