@@ -73,10 +73,12 @@ variable "keys" {
     error_message = "keys version_template is required for every purpose except ENCRYPT_DECRYPT."
   }
 
+  # Older Terraform evaluates both operands of ||, so a null version_template
+  # must be guarded with a conditional before reading its attributes.
   validation {
     condition = alltrue([
       for k in values(var.keys) :
-      k.version_template == null || contains(["SOFTWARE", "HSM", "EXTERNAL", "EXTERNAL_VPC"], k.version_template.protection_level)
+      k.version_template == null ? true : contains(["SOFTWARE", "HSM", "EXTERNAL", "EXTERNAL_VPC"], k.version_template.protection_level)
     ])
     error_message = "keys version_template protection_level must be SOFTWARE, HSM, EXTERNAL, or EXTERNAL_VPC."
   }
