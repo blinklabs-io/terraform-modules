@@ -1,5 +1,11 @@
 locals {
-  region = join("-", slice(split("-", var.zone), 0, 2))
+  region       = join("-", slice(split("-", var.zone), 0, 2))
+  confidential = var.confidential_instance_type != null
+
+  # Confidential and Spot VMs cannot live-migrate, so GCP requires TERMINATE.
+  # The scheduling block is only rendered when one of them is requested, so
+  # existing instances keep the provider-computed scheduling and show no diff.
+  custom_scheduling = local.confidential || var.spot
 }
 
 resource "google_compute_network" "this" {
@@ -36,7 +42,7 @@ resource "google_compute_firewall" "this" {
     ports    = [for p in var.allow_ports : tostring(p)]
   }
 
-  source_ranges = ["0.0.0.0/0"]
+  source_ranges = var.allow_source_ranges
 }
 
 resource "google_compute_address" "this" {
@@ -77,6 +83,33 @@ resource "google_compute_instance" "this" {
     content {
       email  = var.service_account_email
       scopes = var.service_account_scopes
+    }
+  }
+
+  dynamic "confidential_instance_config" {
+    for_each = local.confidential ? [1] : []
+    content {
+      confidential_instance_type = var.confidential_instance_type
+    }
+  }
+
+  dynamic "shielded_instance_config" {
+    for_each = var.shielded_instance_config != null ? [var.shielded_instance_config] : []
+    content {
+      enable_secure_boot          = shielded_instance_config.value.enable_secure_boot
+      enable_vtpm                 = shielded_instance_config.value.enable_vtpm
+      enable_integrity_monitoring = shielded_instance_config.value.enable_integrity_monitoring
+    }
+  }
+
+  dynamic "scheduling" {
+    for_each = local.custom_scheduling ? [1] : []
+    content {
+      provisioning_model          = var.spot ? "SPOT" : "STANDARD"
+      preemptible                 = var.spot
+      automatic_restart           = !var.spot
+      on_host_maintenance         = "TERMINATE"
+      instance_termination_action = var.spot ? var.instance_termination_action : null
     }
   }
 
