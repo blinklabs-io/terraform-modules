@@ -57,6 +57,9 @@ resource "google_compute_instance" "this" {
   project      = var.project
   zone         = var.zone
 
+  # The provider requires AMD Milan for SEV_SNP; null keeps the computed value.
+  min_cpu_platform = var.confidential_instance_type == "SEV_SNP" ? "AMD Milan" : null
+
   metadata = merge(
     { block-project-ssh-keys = "true" },
     var.metadata,
