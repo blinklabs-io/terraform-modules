@@ -46,7 +46,7 @@ variable "metadata" {
   default     = {}
 }
 variable "allow_ports" {
-  description = "List of TCP ports to allow ingress from 0.0.0.0/0. Only applies to custom VPC."
+  description = "List of TCP ports to allow ingress from allow_source_ranges. Only applies to custom VPC."
   type        = list(number)
   default     = [22]
 }
@@ -67,6 +67,7 @@ variable "service_account_scopes" {
     "https://www.googleapis.com/auth/trace.append",
   ]
 }
+
 variable "allow_source_ranges" {
   description = "Source CIDR ranges allowed by the firewall rule. Only applies to custom VPC."
   type        = list(string)
@@ -77,8 +78,9 @@ variable "allow_source_ranges" {
     error_message = "allow_source_ranges must contain at least one CIDR range."
   }
 }
+
 variable "confidential_instance_type" {
-  description = "Confidential VM technology: SEV, SEV_SNP or TDX. Disabled if null. Forces on_host_maintenance to TERMINATE; the machine type and image must support it."
+  description = "Confidential VM technology: SEV, SEV_SNP or TDX. Disabled if null. Forces on_host_maintenance to TERMINATE, and SEV_SNP sets min_cpu_platform to AMD Milan; the machine type and image must support it. Changing it replaces the instance; resetting it to null does not disable it on an existing instance."
   type        = string
   default     = null
 
@@ -87,8 +89,9 @@ variable "confidential_instance_type" {
     error_message = "confidential_instance_type must be null, SEV, SEV_SNP or TDX."
   }
 }
+
 variable "shielded_instance_config" {
-  description = "Shielded VM settings. The block is omitted if null."
+  description = "Shielded VM settings. The block is omitted if null, which leaves the current setting unchanged. Changing it on a running instance fails because the instance must be stopped."
   type = object({
     enable_secure_boot          = optional(bool, false)
     enable_vtpm                 = optional(bool, true)
@@ -96,11 +99,13 @@ variable "shielded_instance_config" {
   })
   default = null
 }
+
 variable "spot" {
-  description = "Run the instance as a Spot VM (preemptible, no automatic restart)."
+  description = "Run the instance as a Spot VM (preemptible, no automatic restart). Enabling it replaces the instance; resetting it to false does not convert an existing instance back."
   type        = bool
   default     = false
 }
+
 variable "instance_termination_action" {
   description = "Action when a Spot VM is preempted: STOP or DELETE. Only used when spot is true."
   type        = string

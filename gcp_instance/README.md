@@ -46,7 +46,7 @@ module "instance" {
 
 ```hcl
 module "instance" {
-  source = "git::https://github.com/blinklabs-io/terraform-modules.git?ref=gcp_instance/v0.1.0"
+  source = "git::https://github.com/blinklabs-io/terraform-modules.git?ref=gcp_instance/v0.2.0"
 
   name         = "my-instance"
   machine_type = "n2d-standard-4"
@@ -66,31 +66,31 @@ module "instance" {
 
 | Name      | Version       |
 | --------- | ------------- |
-| terraform | >= 1.1, < 2.0 |
+| terraform | >= 1.3, < 2.0 |
 | google    | ~> 7          |
 
 ## Inputs
 
-| Name                   | Description                                                                      | Type           | Required | Default                             |
-| ---------------------- | -------------------------------------------------------------------------------- | -------------- | -------- | ----------------------------------- |
-| name                   | Instance and resource name                                                       | `string`       | Yes      | -                                   |
-| machine_type           | GCP machine type (e.g., `e2-medium`)                                             | `string`       | Yes      | -                                   |
-| project                | GCP project ID                                                                   | `string`       | Yes      | -                                   |
-| zone                   | GCP zone for the instance (region is derived automatically)                      | `string`       | No       | `"us-central1-a"`                   |
-| disk_size              | Boot disk size in GB                                                             | `number`       | No       | `500`                               |
-| image                  | Boot disk image                                                                  | `string`       | No       | `"ubuntu-os-cloud/ubuntu-2004-lts"` |
-| tags                   | Network tags for the instance                                                    | `list(string)` | No       | `[]`                                |
-| use_default_network    | Use GCP's default network instead of creating a custom VPC                       | `bool`         | No       | `false`                             |
-| ip_cidr_range          | Subnet CIDR range for the custom VPC (ignored when `use_default_network = true`) | `string`       | No       | `"10.0.0.0/24"`                     |
-| metadata               | Metadata key/value pairs (e.g., ssh-keys, startup-script). Merged with defaults. | `map(string)`  | No       | `{}`                                |
-| allow_ports            | TCP ports to allow ingress from 0.0.0.0/0. Only applies to custom VPC.           | `list(number)` | No       | `[22]`                              |
-| service_account_email  | Service account email to attach to the instance (omitted if `null`)              | `string`       | No       | `null`                              |
-| service_account_scopes | OAuth scopes for the service account                                             | `list(string)` | No       | See below                           |
-| allow_source_ranges | Source CIDR ranges allowed by the firewall rule. Only applies to custom VPC. | `list(string)` | No | `["0.0.0.0/0"]` |
-| confidential_instance_type | Confidential VM type: `SEV`, `SEV_SNP` or `TDX` (disabled if `null`). Sets `on_host_maintenance = "TERMINATE"`. | `string` | No | `null` |
-| shielded_instance_config | Shielded VM settings (`enable_secure_boot`, `enable_vtpm`, `enable_integrity_monitoring`); block omitted if `null` | `object` | No | `null` |
-| spot | Run as a Spot VM (preemptible, no automatic restart, `TERMINATE` on host maintenance) | `bool` | No | `false` |
-| instance_termination_action | Spot preemption action: `STOP` or `DELETE`. Only used when `spot = true`. | `string` | No | `"STOP"` |
+| Name                        | Description                                                                                                                                                                                              | Type           | Required | Default                             |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | -------- | ----------------------------------- |
+| name                        | Instance and resource name                                                                                                                                                                               | `string`       | Yes      | -                                   |
+| machine_type                | GCP machine type (e.g., `e2-medium`)                                                                                                                                                                     | `string`       | Yes      | -                                   |
+| project                     | GCP project ID                                                                                                                                                                                           | `string`       | Yes      | -                                   |
+| zone                        | GCP zone for the instance (region is derived automatically)                                                                                                                                              | `string`       | No       | `"us-central1-a"`                   |
+| disk_size                   | Boot disk size in GB                                                                                                                                                                                     | `number`       | No       | `500`                               |
+| image                       | Boot disk image                                                                                                                                                                                          | `string`       | No       | `"ubuntu-os-cloud/ubuntu-2004-lts"` |
+| tags                        | Network tags for the instance                                                                                                                                                                            | `list(string)` | No       | `[]`                                |
+| use_default_network         | Use GCP's default network instead of creating a custom VPC                                                                                                                                               | `bool`         | No       | `false`                             |
+| ip_cidr_range               | Subnet CIDR range for the custom VPC (ignored when `use_default_network = true`)                                                                                                                         | `string`       | No       | `"10.0.0.0/24"`                     |
+| metadata                    | Metadata key/value pairs (e.g., ssh-keys, startup-script). Merged with defaults.                                                                                                                         | `map(string)`  | No       | `{}`                                |
+| allow_ports                 | TCP ports to allow ingress from `allow_source_ranges`. Only applies to custom VPC.                                                                                                                       | `list(number)` | No       | `[22]`                              |
+| service_account_email       | Service account email to attach to the instance (omitted if `null`)                                                                                                                                      | `string`       | No       | `null`                              |
+| service_account_scopes      | OAuth scopes for the service account                                                                                                                                                                     | `list(string)` | No       | See below                           |
+| allow_source_ranges         | Source CIDR ranges allowed by the firewall rule. Only applies to custom VPC.                                                                                                                             | `list(string)` | No       | `["0.0.0.0/0"]`                     |
+| confidential_instance_type  | Confidential VM type: `SEV`, `SEV_SNP` or `TDX` (disabled if `null`). Sets `on_host_maintenance = "TERMINATE"`; `SEV_SNP` also sets `min_cpu_platform = "AMD Milan"`. Changing it replaces the instance. | `string`       | No       | `null`                              |
+| shielded_instance_config    | Shielded VM settings (`enable_secure_boot`, `enable_vtpm`, `enable_integrity_monitoring`); block omitted if `null`. Changing it requires a stopped instance.                                             | `object`       | No       | `null`                              |
+| spot                        | Run as a Spot VM (preemptible, no automatic restart, `TERMINATE` on host maintenance). Enabling it replaces the instance.                                                                                | `bool`         | No       | `false`                             |
+| instance_termination_action | Spot preemption action: `STOP` or `DELETE`. Only used when `spot = true`.                                                                                                                                | `string`       | No       | `"STOP"`                            |
 
 ### Default service account scopes
 
