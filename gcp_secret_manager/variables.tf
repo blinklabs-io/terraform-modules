@@ -12,6 +12,7 @@ variable "secrets" {
     kms_key_name          = optional(string)
     replication_locations = optional(map(object({ kms_key_name = optional(string) })), {})
     iam_members           = optional(map(list(string)), {})
+    deletion_protection   = optional(bool, true)
   }))
   default = {}
 
@@ -39,5 +40,12 @@ variable "secrets" {
       for s in values(var.secrets) : alltrue([for members in values(s.iam_members) : length(members) > 0])
     ])
     error_message = "Each iam_members role must list at least one member."
+  }
+
+  validation {
+    condition = alltrue([
+      for s in values(var.secrets) : alltrue([for members in values(s.iam_members) : length(distinct(members)) == length(members)])
+    ])
+    error_message = "Each iam_members role must not list the same member twice."
   }
 }

@@ -3,7 +3,7 @@ locals {
     for id, s in var.secrets : {
       for pair in flatten([
         for role, members in s.iam_members : [for m in members : { role = role, member = m }]
-      ]) : "${id}|${pair.role}|${pair.member}" => merge(pair, { secret = id })
+      ]) : "${id}::${pair.role}::${pair.member}" => merge(pair, { secret = id })
     }
   ]...)
 }
@@ -16,6 +16,7 @@ resource "google_secret_manager_secret" "this" {
   labels              = each.value.labels
   annotations         = each.value.annotations
   version_destroy_ttl = each.value.version_destroy_ttl
+  deletion_protection = each.value.deletion_protection
 
   replication {
     dynamic "auto" {
