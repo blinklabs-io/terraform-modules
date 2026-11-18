@@ -22,7 +22,7 @@ variable "keys" {
   description = <<-EOT
     Crypto keys to create in the key ring, keyed by key name.
     purpose is ENCRYPT_DECRYPT, ASYMMETRIC_SIGN, ASYMMETRIC_DECRYPT, RAW_ENCRYPT_DECRYPT, or MAC.
-    rotation_period is a duration in seconds such as 7776000s, valid only for ENCRYPT_DECRYPT keys; null disables automatic rotation.
+    rotation_period is a duration of at least 86400 seconds such as 7776000s, valid only for ENCRYPT_DECRYPT keys; null disables automatic rotation.
     version_template sets the algorithm and protection_level (SOFTWARE, HSM, EXTERNAL, or EXTERNAL_VPC) of new versions and is required for every purpose except ENCRYPT_DECRYPT.
     destroy_scheduled_duration is how long a destroyed key version stays recoverable, in seconds such as 2592000s; it cannot be changed after the key is created.
     iam_members maps a role to the members granted that role on the key, additively. Members are any IAM principal string, including principalSet:// and principal:// workload identity values, and must be known at plan time.
@@ -56,9 +56,13 @@ variable "keys" {
   validation {
     condition = alltrue([
       for k in values(var.keys) :
-      k.rotation_period == null || (can(regex("^[0-9]+s$", k.rotation_period)) && k.purpose == "ENCRYPT_DECRYPT")
+      k.rotation_period == null || (
+        can(regex("^[0-9]+s$", k.rotation_period)) &&
+        try(tonumber(trimsuffix(k.rotation_period, "s")) >= 86400, false) &&
+        k.purpose == "ENCRYPT_DECRYPT"
+      )
     ])
-    error_message = "keys rotation_period must be null or a number of seconds ending in s, for example 7776000s, and is only valid for ENCRYPT_DECRYPT keys."
+    error_message = "keys rotation_period must be null or at least 86400 seconds ending in s, for example 7776000s, and is only valid for ENCRYPT_DECRYPT keys."
   }
 
   validation {
@@ -83,5 +87,16 @@ variable "keys" {
       k.destroy_scheduled_duration == null || can(regex("^[0-9]+s$", k.destroy_scheduled_duration))
     ])
     error_message = "keys destroy_scheduled_duration must be null or a number of seconds ending in s, for example 2592000s."
+  }
+}
+
+variable "deletion_policy" {
+  description = "Deletion policy for every crypto key. PREVENT fails any Terraform destroy or replacement of a key, ABANDON removes a key from state without changing it in GCP, DELETE allows destroy, which destroys every version of the key."
+  type        = string
+  default     = "PREVENT"
+
+  validation {
+    condition     = contains(["PREVENT", "ABANDON", "DELETE"], var.deletion_policy)
+    error_message = "deletion_policy must be one of: PREVENT, ABANDON, DELETE."
   }
 }

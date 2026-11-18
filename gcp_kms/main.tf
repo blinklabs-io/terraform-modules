@@ -5,7 +5,7 @@ locals {
     for binding in flatten([
       for key_name, key in var.keys : [
         for role, members in key.iam_members : [
-          for member in members : {
+          for member in distinct(members) : {
             key_name = key_name
             role     = role
             member   = member
@@ -16,11 +16,6 @@ locals {
   }
 }
 
-# GCP never deletes key rings or crypto keys: removing either from state only
-# destroys key versions, and the names stay reserved. lifecycle.prevent_destroy
-# cannot be set from a variable, so keys are protected by destroy_scheduled_duration
-# (a destroyed version stays recoverable for that period) and by the IAM and
-# review process around the calling configuration.
 resource "google_kms_key_ring" "this" {
   project  = var.project
   name     = var.name
@@ -36,6 +31,7 @@ resource "google_kms_crypto_key" "this" {
   rotation_period            = each.value.rotation_period
   destroy_scheduled_duration = each.value.destroy_scheduled_duration
   labels                     = each.value.labels
+  deletion_policy            = var.deletion_policy
 
   dynamic "version_template" {
     for_each = each.value.version_template == null ? [] : [each.value.version_template]
