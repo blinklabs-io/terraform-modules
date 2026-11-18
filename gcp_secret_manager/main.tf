@@ -55,8 +55,11 @@ resource "google_secret_manager_secret" "this" {
 resource "google_secret_manager_secret_iam_member" "this" {
   for_each = local.iam_members
 
-  project   = var.project
-  secret_id = google_secret_manager_secret.this[each.value.secret].secret_id
+  project = var.project
+  # The id is unknown while its entry is being replaced, and secret_id forces
+  # replacement, so each grant is re-created in the same apply as its entry.
+  # The entry's own name would stay the same and leave the new entry ungranted.
+  secret_id = google_secret_manager_secret.this[each.value.secret].id
   role      = each.value.role
   member    = each.value.member
 }

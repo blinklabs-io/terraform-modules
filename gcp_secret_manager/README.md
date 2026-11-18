@@ -48,7 +48,7 @@ module "secrets" {
 
 | Name      | Version       |
 | --------- | ------------- |
-| terraform | >= 1.1, < 2.0 |
+| terraform | >= 1.3, < 2.0 |
 | google    | ~> 7          |
 
 ## Inputs
