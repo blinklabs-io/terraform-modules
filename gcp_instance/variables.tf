@@ -101,7 +101,7 @@ variable "shielded_instance_config" {
 }
 
 variable "spot" {
-  description = "Run the instance as a Spot VM (preemptible, no automatic restart). Enabling it replaces the instance; resetting it to false does not convert an existing instance back."
+  description = "Run the instance as a Spot VM (preemptible, no automatic restart). Enabling it replaces the instance. Disabling it also replaces the instance when confidential_instance_type is set; otherwise the scheduling block is omitted and the instance stays Spot."
   type        = bool
   default     = false
 }
