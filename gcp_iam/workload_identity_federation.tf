@@ -26,9 +26,21 @@ resource "google_iam_workload_identity_pool_provider" "this" {
   attribute_mapping                  = each.value.attribute_mapping
   attribute_condition                = each.value.attribute_condition
 
-  oidc {
-    issuer_uri        = each.value.issuer_uri
-    allowed_audiences = each.value.allowed_audiences
+  dynamic "oidc" {
+    for_each = each.value.aws_account_id == null ? [1] : []
+
+    content {
+      issuer_uri        = each.value.issuer_uri
+      allowed_audiences = each.value.allowed_audiences
+    }
+  }
+
+  dynamic "aws" {
+    for_each = each.value.aws_account_id == null ? [] : [1]
+
+    content {
+      account_id = each.value.aws_account_id
+    }
   }
 }
 
