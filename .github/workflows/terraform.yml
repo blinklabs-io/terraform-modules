@@ -22,7 +22,7 @@ jobs:
         id: find-modules
         run: |
           modules=$(find . -maxdepth 1 -type d \( -name 'aws_*' -o -name 'cloudflare_*' -o -name 'gcp_*' -o -name 'grafana_*' \) | sed 's|^\./||' | sort | jq -R -s -c 'split("\n") | map(select(length > 0))')
-          echo "modules=$modules" >> $GITHUB_OUTPUT
+          echo "modules=$modules" >> "$GITHUB_OUTPUT"
 
   fmt:
     name: Format Check
@@ -58,7 +58,7 @@ jobs:
         working-directory: ${{ matrix.module }}
         run: terraform validate
 
-      - name: Test Grafana alert pause behavior
-        if: matrix.module == 'grafana_alerts'
-        working-directory: grafana_alerts
+      - name: Test module behavior
+        if: contains(fromJSON('["gcp_iam", "grafana_alerts"]'), matrix.module)
+        working-directory: ${{ matrix.module }}
         run: terraform test -no-color

@@ -77,7 +77,7 @@ variable "workload_identity_bindings" {
 }
 
 variable "workload_identity_pools" {
-  description = "Workload identity pools with OIDC providers for external identities"
+  description = "Workload identity pools with OIDC or AWS providers for external identities"
   type = list(object({
     pool_id      = string
     display_name = optional(string)
@@ -88,13 +88,24 @@ variable "workload_identity_pools" {
       provider_id         = string
       display_name        = optional(string)
       description         = optional(string)
-      issuer_uri          = string
+      issuer_uri          = optional(string)
+      aws_account_id      = optional(string)
       allowed_audiences   = optional(list(string), [])
       attribute_mapping   = map(string)
       attribute_condition = string
     })), [])
   }))
   default = []
+
+  validation {
+    condition = alltrue(flatten([
+      for p in var.workload_identity_pools : [
+        for pr in p.providers :
+        (pr.issuer_uri != null) != (pr.aws_account_id != null)
+      ]
+    ]))
+    error_message = "Each workload identity provider must set exactly one of issuer_uri or aws_account_id."
+  }
 
   validation {
     condition = alltrue(flatten([

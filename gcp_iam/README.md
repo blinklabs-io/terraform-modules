@@ -8,7 +8,7 @@ Terraform module for managing GCP IAM resources including service accounts, cust
 - Assign IAM roles to service accounts across projects
 - Create custom IAM roles with specific permissions
 - Configure workload identity bindings for Kubernetes service accounts
-- Create workload identity pools and OIDC providers, and let their principals impersonate service accounts (for example, CI systems such as GitHub Actions, or workloads in another cloud, without service account keys)
+- Create workload identity pools with OIDC or AWS providers, and let their principals impersonate service accounts without service account keys
 - Manage organization-level IAM role bindings
 
 ## Usage
@@ -129,6 +129,28 @@ module "iam" {
 The `name` in the `workload_identity_pool_providers` output is the full
 provider resource name that identifies the provider in a token exchange.
 
+An AWS provider uses the AWS account ID instead of an OIDC issuer. Its
+attribute condition should narrow access to the intended roles in that account:
+
+```hcl
+workload_identity_pools = [
+  {
+    pool_id = "aws-workloads"
+    providers = [
+      {
+        provider_id    = "production"
+        aws_account_id = "123456789012"
+        attribute_mapping = {
+          "google.subject"    = "assertion.arn"
+          "attribute.aws_role" = "assertion.arn.extract('assumed-role/{role}/')"
+        }
+        attribute_condition = "assertion.account == '123456789012' && attribute.aws_role == 'production-deployer'"
+      }
+    ]
+  }
+]
+```
+
 ## Requirements
 
 | Name      | Version       |
@@ -147,7 +169,7 @@ provider resource name that identifies the provider in a token exchange.
 | project_iam_members        | List of project-level IAM member bindings               | `list(object)` | No       | `[]`    |
 | organization_id            | GCP organization ID for organization-level IAM bindings | `string`       | No       | `null`  |
 | organization_iam_bindings  | List of organization-level IAM role bindings            | `list(object)` | No       | `[]`    |
-| workload_identity_pools    | Workload identity pools with OIDC providers             | `list(object)` | No       | `[]`    |
+| workload_identity_pools    | Workload identity pools with OIDC or AWS providers       | `list(object)` | No       | `[]`    |
 | workload_identity_pool_bindings | Service account impersonation grants for pool principals | `list(object)` | No | `[]` |
 
 ### service_accounts object
@@ -199,7 +221,7 @@ provider resource name that identifies the provider in a token exchange.
 | description  | Description of the pool         | `string`       | No       | `null`  |
 | project      | Project ID (overrides default)  | `string`       | No       | `null`  |
 | disabled     | Whether the pool is disabled    | `bool`         | No       | `false` |
-| providers    | OIDC providers in the pool      | `list(object)` | No       | `[]`    |
+| providers    | OIDC or AWS providers in the pool | `list(object)` | No     | `[]`    |
 
 #### providers nested object
 
@@ -208,10 +230,13 @@ provider resource name that identifies the provider in a token exchange.
 | provider_id         | Provider ID                                                  | `string`       | Yes      | -       |
 | display_name        | Display name for the provider                                | `string`       | No       | `null`  |
 | description         | Description of the provider                                  | `string`       | No       | `null`  |
-| issuer_uri          | OIDC issuer URI                                              | `string`       | Yes      | -       |
+| issuer_uri          | OIDC issuer URI                                              | `string`       | No\*     | `null`  |
+| aws_account_id      | AWS account ID                                               | `string`       | No\*     | `null`  |
 | allowed_audiences   | Accepted token audiences; empty accepts the provider's default | `list(string)` | No     | `[]`    |
 | attribute_mapping   | Map of Google attributes to token assertions                 | `map(string)`  | Yes      | -       |
 | attribute_condition | CEL condition a token must satisfy; must not be empty        | `string`       | Yes      | -       |
+
+\*Exactly one of `issuer_uri` or `aws_account_id` must be set.
 
 **Note**: A provider without an attribute condition accepts every token from its
 issuer. For a shared public issuer, such as a hosted CI service, that is every
