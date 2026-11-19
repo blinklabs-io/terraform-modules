@@ -8,24 +8,30 @@ locals {
   # a Spot VM back to STANDARD. With spot = null and no confidential type the
   # block stays omitted and existing instances show no diff.
   custom_scheduling = local.confidential || var.spot != null
+
+  # An existing subnetwork replaces both the module's VPC and the default lookup.
+  # The input is an object so these tests stay known at plan time when its
+  # self_link comes from a resource created in the same apply.
+  create_network = var.use_default_network == false && var.subnetwork == null
+  lookup_default = var.use_default_network && var.subnetwork == null
 }
 
 resource "google_compute_network" "this" {
-  for_each                = toset([for n in [var.name] : n if var.use_default_network == false])
+  for_each                = toset([for n in [var.name] : n if local.create_network])
   name                    = each.key
   project                 = var.project
   auto_create_subnetworks = false
 }
 
 data "google_compute_subnetwork" "this" {
-  for_each = toset([for n in ["default"] : n if var.use_default_network])
+  for_each = toset([for n in ["default"] : n if local.lookup_default])
   name     = each.key
   region   = local.region
   project  = var.project
 }
 
 resource "google_compute_subnetwork" "this" {
-  for_each      = toset([for n in [var.name] : n if var.use_default_network == false])
+  for_each      = toset([for n in [var.name] : n if local.create_network])
   name          = each.key
   ip_cidr_range = var.ip_cidr_range
   region        = local.region
@@ -34,7 +40,7 @@ resource "google_compute_subnetwork" "this" {
 }
 
 resource "google_compute_firewall" "this" {
-  for_each = toset([for n in [var.name] : n if var.use_default_network == false && length(var.allow_ports) > 0])
+  for_each = toset([for n in [var.name] : n if local.create_network && length(var.allow_ports) > 0])
   name     = "${each.key}-allow"
   network  = google_compute_network.this[var.name].id
   project  = var.project
@@ -48,9 +54,15 @@ resource "google_compute_firewall" "this" {
 }
 
 resource "google_compute_address" "this" {
+  count   = var.assign_external_ip ? 1 : 0
   name    = var.name
   region  = local.region
   project = var.project
+}
+
+moved {
+  from = google_compute_address.this
+  to   = google_compute_address.this[0]
 }
 
 resource "google_compute_instance" "this" {
@@ -75,11 +87,16 @@ resource "google_compute_instance" "this" {
   }
 
   network_interface {
-    subnetwork         = var.use_default_network ? data.google_compute_subnetwork.this["default"].self_link : google_compute_subnetwork.this[var.name].self_link
-    subnetwork_project = var.project
+    # A self_link or projects/ path carries its own project, which the provider
+    # reads back into subnetwork_project; forcing var.project there diffs forever.
+    subnetwork         = var.subnetwork != null ? var.subnetwork.self_link : (var.use_default_network ? data.google_compute_subnetwork.this["default"].self_link : google_compute_subnetwork.this[var.name].self_link)
+    subnetwork_project = var.subnetwork != null && can(regex("^(https://|projects/)", var.subnetwork.self_link)) ? null : var.project
 
-    access_config {
-      nat_ip = google_compute_address.this.address
+    dynamic "access_config" {
+      for_each = var.assign_external_ip ? [1] : []
+      content {
+        nat_ip = google_compute_address.this[0].address
+      }
     }
   }
 
@@ -120,4 +137,12 @@ resource "google_compute_instance" "this" {
   }
 
   tags = var.tags
+
+  # Cross-variable validation blocks need Terraform 1.9; this runs on 1.3.
+  lifecycle {
+    precondition {
+      condition     = !(var.subnetwork != null && var.use_default_network)
+      error_message = "subnetwork cannot be combined with use_default_network = true."
+    }
+  }
 }

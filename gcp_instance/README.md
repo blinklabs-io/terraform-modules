@@ -62,6 +62,24 @@ module "instance" {
 }
 ```
 
+### Existing subnetwork, no external address
+
+```hcl
+module "instance" {
+  source = "git::https://github.com/blinklabs-io/terraform-modules.git?ref=gcp_instance/v0.3.0"
+
+  name         = "my-instance"
+  machine_type = "e2-medium"
+  project      = "my-gcp-project"
+  zone         = "us-central1-a"
+
+  subnetwork = {
+    self_link = "projects/my-gcp-project/regions/us-central1/subnetworks/my-subnet"
+  }
+  assign_external_ip = false
+}
+```
+
 ## Requirements
 
 | Name      | Version       |
@@ -81,12 +99,14 @@ module "instance" {
 | image                       | Boot disk image                                                                                                                                                                                          | `string`       | No       | `"ubuntu-os-cloud/ubuntu-2004-lts"` |
 | tags                        | Network tags for the instance                                                                                                                                                                            | `list(string)` | No       | `[]`                                |
 | use_default_network         | Use GCP's default network instead of creating a custom VPC                                                                                                                                               | `bool`         | No       | `false`                             |
-| ip_cidr_range               | Subnet CIDR range for the custom VPC (ignored when `use_default_network = true`)                                                                                                                         | `string`       | No       | `"10.0.0.0/24"`                     |
+| subnetwork                  | Existing subnetwork as `{ self_link = ... }`: a self_link or `projects/P/regions/R/subnetworks/N`; a bare name resolves in `project` and the region of `zone`. An object, so a self_link known only after apply still plans. Creates no VPC, subnetwork or firewall and skips the default lookup. Cannot be combined with `use_default_network = true`. | `object`       | No       | `null`                              |
+| assign_external_ip          | Create a static external address and `access_config`. `false` creates neither and `external_ip` is `null`.                                                                                               | `bool`         | No       | `true`                              |
+| ip_cidr_range               | Subnet CIDR range for the custom VPC (ignored when `use_default_network = true` or `subnetwork` is set)                                                                                                                       | `string`       | No       | `"10.0.0.0/24"`                     |
 | metadata                    | Metadata key/value pairs (e.g., ssh-keys, startup-script). Merged with defaults.                                                                                                                         | `map(string)`  | No       | `{}`                                |
-| allow_ports                 | TCP ports to allow ingress from `allow_source_ranges`. Only applies to custom VPC.                                                                                                                       | `list(number)` | No       | `[22]`                              |
+| allow_ports                 | TCP ports to allow ingress from `allow_source_ranges`. Only applies to the module-created VPC.                                                                                                                       | `list(number)` | No       | `[22]`                              |
 | service_account_email       | Service account email to attach to the instance (omitted if `null`)                                                                                                                                      | `string`       | No       | `null`                              |
 | service_account_scopes      | OAuth scopes for the service account                                                                                                                                                                     | `list(string)` | No       | See below                           |
-| allow_source_ranges         | Source CIDR ranges allowed by the firewall rule. Only applies to custom VPC.                                                                                                                             | `list(string)` | No       | `["0.0.0.0/0"]`                     |
+| allow_source_ranges         | Source CIDR ranges allowed by the firewall rule. Only applies to the module-created VPC.                                                                                                                             | `list(string)` | No       | `["0.0.0.0/0"]`                     |
 | confidential_instance_type  | Confidential VM type: `SEV`, `SEV_SNP` or `TDX` (disabled if `null`). Sets `on_host_maintenance = "TERMINATE"`; `SEV_SNP` also sets `min_cpu_platform = "AMD Milan"`. Changing it replaces the instance. | `string`       | No       | `null`                              |
 | shielded_instance_config    | Shielded VM settings (`enable_secure_boot`, `enable_vtpm`, `enable_integrity_monitoring`); block omitted if `null`. Changing it requires a stopped instance.                                             | `object`       | No       | `null`                              |
 | spot                        | `null` leaves scheduling unmanaged unless confidential; `true` runs a Spot VM (preemptible, `TERMINATE`); `false` sets `STANDARD` explicitly. Switching between them replaces the instance.              | `bool`         | No       | `null`                              |
@@ -104,9 +124,9 @@ service.management.readonly, servicecontrol, trace.append
 | Name          | Description                                         |
 | ------------- | --------------------------------------------------- |
 | instance_name | Name of the created compute instance                |
-| external_ip   | Static external IP address assigned to the instance |
+| external_ip   | Static external IP address assigned to the instance (`null` when `assign_external_ip = false`) |
 
 ## Notes
 
-- **Firewall rules**: When using a custom VPC (`use_default_network = false`), a firewall rule is created allowing TCP ingress on `allow_ports` (default: SSH only). Set `allow_ports = []` to disable. Does not apply when using the default network.
+- **Firewall rules**: When using a custom VPC (`use_default_network = false`), a firewall rule is created allowing TCP ingress on `allow_ports` (default: SSH only). Set `allow_ports = []` to disable. Does not apply when using the default network or an existing `subnetwork`.
 - **SSH keys**: Project-wide SSH keys are blocked by default for security. Use the `metadata` variable to set instance-level SSH keys or enable OS Login.

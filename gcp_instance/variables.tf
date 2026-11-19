@@ -35,8 +35,26 @@ variable "use_default_network" {
   type        = bool
   default     = false
 }
+variable "subnetwork" {
+  description = "Existing subnetwork for the network interface. self_link is a subnetwork self_link or projects/PROJECT/regions/REGION/subnetworks/NAME; a bare name resolves in var.project and the region of var.zone. When set, no VPC, subnetwork or firewall is created and the default network is not looked up. Cannot be combined with use_default_network = true."
+  type = object({
+    self_link = string
+  })
+  default = null
+
+  validation {
+    condition     = var.subnetwork == null ? true : try(length(trimspace(var.subnetwork.self_link)) > 0, false)
+    error_message = "subnetwork.self_link must be a non-empty subnetwork self_link, path or name."
+  }
+}
+variable "assign_external_ip" {
+  description = "Create a static external address and attach it through an access_config. Set false for an instance with no public address."
+  type        = bool
+  default     = true
+  nullable    = false
+}
 variable "ip_cidr_range" {
-  description = "Subnet CIDR range for the custom VPC. Ignored when use_default_network is true."
+  description = "Subnet CIDR range for the custom VPC. Ignored when use_default_network is true or subnetwork is set."
   type        = string
   default     = "10.0.0.0/24"
 }
@@ -46,7 +64,7 @@ variable "metadata" {
   default     = {}
 }
 variable "allow_ports" {
-  description = "List of TCP ports to allow ingress from allow_source_ranges. Only applies to custom VPC."
+  description = "List of TCP ports to allow ingress from allow_source_ranges. Only applies to the module-created VPC."
   type        = list(number)
   default     = [22]
 }
@@ -69,7 +87,7 @@ variable "service_account_scopes" {
 }
 
 variable "allow_source_ranges" {
-  description = "Source CIDR ranges allowed by the firewall rule. Only applies to custom VPC."
+  description = "Source CIDR ranges allowed by the firewall rule. Only applies to the module-created VPC."
   type        = list(string)
   default     = ["0.0.0.0/0"]
 

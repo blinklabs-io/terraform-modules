@@ -4,6 +4,6 @@ output "instance_name" {
 }
 
 output "external_ip" {
-  description = "Static external IP address assigned to the instance."
-  value       = google_compute_address.this.address
+  description = "Static external IP address assigned to the instance. Null when assign_external_ip is false."
+  value       = one(google_compute_address.this[*].address)
 }
