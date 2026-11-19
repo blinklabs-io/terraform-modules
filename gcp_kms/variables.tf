@@ -24,6 +24,8 @@ variable "keys" {
     purpose is ENCRYPT_DECRYPT, ASYMMETRIC_SIGN, ASYMMETRIC_DECRYPT, RAW_ENCRYPT_DECRYPT, or MAC.
     rotation_period is a duration of at least 86400 seconds such as 7776000s, valid only for ENCRYPT_DECRYPT keys; null disables automatic rotation.
     version_template sets the algorithm and protection_level (SOFTWARE, HSM, EXTERNAL, or EXTERNAL_VPC) of new versions and is required for every purpose except ENCRYPT_DECRYPT.
+    EXTERNAL and EXTERNAL_VPC keys are created without a key version; create the version, with its external key URI or path, outside this module.
+    crypto_key_backend is the EKM connection, projects/{project}/locations/{location}/ekmConnections/{name}, and is required for EXTERNAL_VPC keys and invalid for every other protection level; it cannot be changed after the key is created.
     destroy_scheduled_duration is how long a destroyed key version stays recoverable, in seconds such as 2592000s; it cannot be changed after the key is created.
     iam_members maps a role to the members granted that role on the key, additively. Members are any IAM principal string, including principalSet:// and principal:// workload identity values, and must be known at plan time.
   EOT
@@ -34,6 +36,7 @@ variable "keys" {
       algorithm        = string
       protection_level = optional(string, "SOFTWARE")
     }))
+    crypto_key_backend         = optional(string)
     destroy_scheduled_duration = optional(string)
     labels                     = optional(map(string), {})
     iam_members                = optional(map(list(string)), {})
@@ -81,6 +84,14 @@ variable "keys" {
       k.version_template == null ? true : contains(["SOFTWARE", "HSM", "EXTERNAL", "EXTERNAL_VPC"], k.version_template.protection_level)
     ])
     error_message = "keys version_template protection_level must be SOFTWARE, HSM, EXTERNAL, or EXTERNAL_VPC."
+  }
+
+  validation {
+    condition = alltrue([
+      for k in values(var.keys) :
+      (k.version_template == null ? false : k.version_template.protection_level == "EXTERNAL_VPC") == (k.crypto_key_backend != null)
+    ])
+    error_message = "keys crypto_key_backend is required for EXTERNAL_VPC keys and must be null for every other protection level."
   }
 
   validation {

@@ -8,6 +8,7 @@ Terraform module for managing a GCP Cloud KMS key ring, its crypto keys, and per
 - Create crypto keys of any purpose, with optional automatic rotation, version template (algorithm and protection level), destroy scheduled duration, and labels
 - Grant roles on individual keys to any principal, including workload identity pool `principalSet://` and `principal://` values, using additive `google_kms_crypto_key_iam_member` bindings
 - Protect crypto keys from Terraform destroy with `deletion_policy`, `PREVENT` by default
+- Create Cloud EKM keys (`EXTERNAL` and `EXTERNAL_VPC`) without a key version, for the version to be created from the external key
 
 ## Usage
 
@@ -57,7 +58,7 @@ reserved in the key ring.
 `deletion_policy` applies to every crypto key and defaults to `PREVENT`, which
 makes any Terraform destroy of a key fail. Applying a plan that replaces a key
 also fails, because replacement destroys the existing key. Changing the `keys`
-map key, `purpose`, `destroy_scheduled_duration`, or
+map key, `purpose`, `destroy_scheduled_duration`, `crypto_key_backend`, or
 `version_template.protection_level` of an existing key forces replacement, as
 does changing `project`, `location`, or `name`. To destroy a key deliberately,
 apply `deletion_policy = "DELETE"` first, then remove it. `ABANDON` removes keys
@@ -66,6 +67,21 @@ from state without changing them in GCP.
 IAM bindings are additive: the module never removes members it did not grant.
 Members used in `iam_members` must be known at plan time because they form part
 of the resource address.
+
+## External keys
+
+Cloud KMS creates the version of an external key from the key's URI or path in
+the external key manager, which this module does not take as input. Keys with
+`version_template.protection_level` set to `EXTERNAL` or `EXTERNAL_VPC` are
+therefore created with no key version; `SOFTWARE` and `HSM` keys are created
+with their first version. An `EXTERNAL_VPC` key also needs `crypto_key_backend`
+set to its EKM connection.
+
+Create the version after the key exists, with `gcloud kms keys versions create`
+and `--external-key-uri` for `EXTERNAL` keys or `--ekm-connection-key-path` for
+`EXTERNAL_VPC` keys, or with a `google_kms_crypto_key_version` resource that
+references the key ID from the `key_ids` output. See
+[Create an external key](https://docs.cloud.google.com/kms/docs/create-external-key).
 
 ## Requirements
 
@@ -91,6 +107,7 @@ of the resource address.
 | purpose                    | `ENCRYPT_DECRYPT`, `ASYMMETRIC_SIGN`, `ASYMMETRIC_DECRYPT`, `RAW_ENCRYPT_DECRYPT`, or `MAC`     | `string`            | No       | `"ENCRYPT_DECRYPT"` |
 | rotation_period            | Automatic rotation period of at least `86400s`, such as `7776000s`; `ENCRYPT_DECRYPT` keys only | `string`            | No       | `null`              |
 | version_template           | Algorithm and protection level of new versions; required unless purpose is `ENCRYPT_DECRYPT`    | `object`            | No       | `null`              |
+| crypto_key_backend         | EKM connection of an `EXTERNAL_VPC` key; required for and only valid with `EXTERNAL_VPC`        | `string`            | No       | `null`              |
 | destroy_scheduled_duration | Recovery period for destroyed versions in seconds, such as `2592000s`; immutable                | `string`            | No       | `null`              |
 | labels                     | Labels for the key                                                                              | `map(string)`       | No       | `{}`                |
 | iam_members                | Map of role to list of members granted that role on the key                                     | `map(list(string))` | No       | `{}`                |

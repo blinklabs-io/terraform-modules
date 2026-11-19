@@ -32,6 +32,11 @@ resource "google_kms_crypto_key" "this" {
   destroy_scheduled_duration = each.value.destroy_scheduled_duration
   labels                     = each.value.labels
   deletion_policy            = var.deletion_policy
+  crypto_key_backend         = each.value.crypto_key_backend
+
+  # Cloud KMS cannot create an external key version without its external key
+  # URI or path, so EXTERNAL and EXTERNAL_VPC keys are created empty.
+  skip_initial_version_creation = each.value.version_template == null ? false : contains(["EXTERNAL", "EXTERNAL_VPC"], each.value.version_template.protection_level)
 
   dynamic "version_template" {
     for_each = each.value.version_template == null ? [] : [each.value.version_template]
