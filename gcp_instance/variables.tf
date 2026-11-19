@@ -46,7 +46,7 @@ variable "metadata" {
   default     = {}
 }
 variable "allow_ports" {
-  description = "List of TCP ports to allow ingress from 0.0.0.0/0. Only applies to custom VPC."
+  description = "List of TCP ports to allow ingress from allow_source_ranges. Only applies to custom VPC."
   type        = list(number)
   default     = [22]
 }
@@ -66,4 +66,53 @@ variable "service_account_scopes" {
     "https://www.googleapis.com/auth/servicecontrol",
     "https://www.googleapis.com/auth/trace.append",
   ]
+}
+
+variable "allow_source_ranges" {
+  description = "Source CIDR ranges allowed by the firewall rule. Only applies to custom VPC."
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+
+  validation {
+    condition     = length(var.allow_source_ranges) > 0
+    error_message = "allow_source_ranges must contain at least one CIDR range."
+  }
+}
+
+variable "confidential_instance_type" {
+  description = "Confidential VM technology: SEV, SEV_SNP or TDX. Disabled if null. Forces on_host_maintenance to TERMINATE, and SEV_SNP sets min_cpu_platform to AMD Milan; the machine type and image must support it. Changing it replaces the instance; resetting it to null does not disable it on an existing instance."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.confidential_instance_type == null || contains(["SEV", "SEV_SNP", "TDX"], coalesce(var.confidential_instance_type, "-"))
+    error_message = "confidential_instance_type must be null, SEV, SEV_SNP or TDX."
+  }
+}
+
+variable "shielded_instance_config" {
+  description = "Shielded VM settings. The block is omitted if null, which leaves the current setting unchanged. Changing it on a running instance fails because the instance must be stopped."
+  type = object({
+    enable_secure_boot          = optional(bool, false)
+    enable_vtpm                 = optional(bool, true)
+    enable_integrity_monitoring = optional(bool, true)
+  })
+  default = null
+}
+
+variable "spot" {
+  description = "Provisioning model. null leaves scheduling unmanaged (keeps the instance's current setting) unless confidential_instance_type is set; true runs a Spot VM (preemptible, no automatic restart); false sets STANDARD scheduling explicitly. Switching between Spot and STANDARD replaces the instance."
+  type        = bool
+  default     = null
+}
+
+variable "instance_termination_action" {
+  description = "Action when a Spot VM is preempted: STOP or DELETE. Only used when spot is true."
+  type        = string
+  default     = "STOP"
+
+  validation {
+    condition     = contains(["STOP", "DELETE"], var.instance_termination_action)
+    error_message = "instance_termination_action must be STOP or DELETE."
+  }
 }

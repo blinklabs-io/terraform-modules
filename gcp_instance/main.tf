@@ -1,5 +1,13 @@
 locals {
-  region = join("-", slice(split("-", var.zone), 0, 2))
+  region       = join("-", slice(split("-", var.zone), 0, 2))
+  confidential = var.confidential_instance_type != null
+  spot         = var.spot == true
+
+  # scheduling is Optional+Computed in the provider: omitting the block keeps
+  # whatever the instance already has, so spot = false must render it to move
+  # a Spot VM back to STANDARD. With spot = null and no confidential type the
+  # block stays omitted and existing instances show no diff.
+  custom_scheduling = local.confidential || var.spot != null
 }
 
 resource "google_compute_network" "this" {
@@ -36,7 +44,7 @@ resource "google_compute_firewall" "this" {
     ports    = [for p in var.allow_ports : tostring(p)]
   }
 
-  source_ranges = ["0.0.0.0/0"]
+  source_ranges = var.allow_source_ranges
 }
 
 resource "google_compute_address" "this" {
@@ -50,6 +58,9 @@ resource "google_compute_instance" "this" {
   machine_type = var.machine_type
   project      = var.project
   zone         = var.zone
+
+  # The provider requires AMD Milan for SEV_SNP; null keeps the computed value.
+  min_cpu_platform = var.confidential_instance_type == "SEV_SNP" ? "AMD Milan" : null
 
   metadata = merge(
     { block-project-ssh-keys = "true" },
@@ -77,6 +88,34 @@ resource "google_compute_instance" "this" {
     content {
       email  = var.service_account_email
       scopes = var.service_account_scopes
+    }
+  }
+
+  dynamic "confidential_instance_config" {
+    for_each = local.confidential ? [1] : []
+    content {
+      confidential_instance_type = var.confidential_instance_type
+    }
+  }
+
+  dynamic "shielded_instance_config" {
+    for_each = var.shielded_instance_config != null ? [var.shielded_instance_config] : []
+    content {
+      enable_secure_boot          = shielded_instance_config.value.enable_secure_boot
+      enable_vtpm                 = shielded_instance_config.value.enable_vtpm
+      enable_integrity_monitoring = shielded_instance_config.value.enable_integrity_monitoring
+    }
+  }
+
+  dynamic "scheduling" {
+    for_each = local.custom_scheduling ? [1] : []
+    content {
+      provisioning_model = local.spot ? "SPOT" : "STANDARD"
+      preemptible        = local.spot
+      automatic_restart  = !local.spot
+      # Confidential and Spot VMs cannot live-migrate, so GCP requires TERMINATE.
+      on_host_maintenance         = local.confidential || local.spot ? "TERMINATE" : "MIGRATE"
+      instance_termination_action = local.spot ? var.instance_termination_action : null
     }
   }
 
