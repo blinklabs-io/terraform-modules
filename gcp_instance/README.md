@@ -73,7 +73,9 @@ module "instance" {
   project      = "my-gcp-project"
   zone         = "us-central1-a"
 
-  subnetwork         = "projects/my-gcp-project/regions/us-central1/subnetworks/my-subnet"
+  subnetwork = {
+    self_link = "projects/my-gcp-project/regions/us-central1/subnetworks/my-subnet"
+  }
   assign_external_ip = false
 }
 ```
@@ -97,7 +99,7 @@ module "instance" {
 | image                       | Boot disk image                                                                                                                                                                                          | `string`       | No       | `"ubuntu-os-cloud/ubuntu-2004-lts"` |
 | tags                        | Network tags for the instance                                                                                                                                                                            | `list(string)` | No       | `[]`                                |
 | use_default_network         | Use GCP's default network instead of creating a custom VPC                                                                                                                                               | `bool`         | No       | `false`                             |
-| subnetwork                  | Existing subnetwork (self_link or `projects/P/regions/R/subnetworks/N`; a bare name resolves in `project`). Creates no VPC, subnetwork or firewall and skips the default lookup. Cannot be combined with `use_default_network = true`. | `string`       | No       | `null`                              |
+| subnetwork                  | Existing subnetwork as `{ self_link = ... }`: a self_link or `projects/P/regions/R/subnetworks/N`; a bare name resolves in `project` and the region of `zone`. An object, so a self_link known only after apply still plans. Creates no VPC, subnetwork or firewall and skips the default lookup. Cannot be combined with `use_default_network = true`. | `object`       | No       | `null`                              |
 | assign_external_ip          | Create a static external address and `access_config`. `false` creates neither and `external_ip` is `null`.                                                                                               | `bool`         | No       | `true`                              |
 | ip_cidr_range               | Subnet CIDR range for the custom VPC (ignored when `use_default_network = true` or `subnetwork` is set)                                                                                                                       | `string`       | No       | `"10.0.0.0/24"`                     |
 | metadata                    | Metadata key/value pairs (e.g., ssh-keys, startup-script). Merged with defaults.                                                                                                                         | `map(string)`  | No       | `{}`                                |

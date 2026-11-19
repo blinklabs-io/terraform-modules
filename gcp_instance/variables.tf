@@ -36,13 +36,15 @@ variable "use_default_network" {
   default     = false
 }
 variable "subnetwork" {
-  description = "Existing subnetwork for the network interface, as a self_link or projects/PROJECT/regions/REGION/subnetworks/NAME (a bare name resolves in var.project and the provider region). When set, no VPC, subnetwork or firewall is created and the default network is not looked up. Cannot be combined with use_default_network = true."
-  type        = string
-  default     = null
+  description = "Existing subnetwork for the network interface. self_link is a subnetwork self_link or projects/PROJECT/regions/REGION/subnetworks/NAME; a bare name resolves in var.project and the region of var.zone. When set, no VPC, subnetwork or firewall is created and the default network is not looked up. Cannot be combined with use_default_network = true."
+  type = object({
+    self_link = string
+  })
+  default = null
 
   validation {
-    condition     = var.subnetwork == null ? true : length(trimspace(var.subnetwork)) > 0
-    error_message = "subnetwork must be null or a non-empty subnetwork self_link, path or name."
+    condition     = var.subnetwork == null ? true : try(length(trimspace(var.subnetwork.self_link)) > 0, false)
+    error_message = "subnetwork.self_link must be a non-empty subnetwork self_link, path or name."
   }
 }
 variable "assign_external_ip" {

@@ -10,6 +10,8 @@ locals {
   custom_scheduling = local.confidential || var.spot != null
 
   # An existing subnetwork replaces both the module's VPC and the default lookup.
+  # The input is an object so these tests stay known at plan time when its
+  # self_link comes from a resource created in the same apply.
   create_network = var.use_default_network == false && var.subnetwork == null
   lookup_default = var.use_default_network && var.subnetwork == null
 }
@@ -87,8 +89,8 @@ resource "google_compute_instance" "this" {
   network_interface {
     # A self_link or projects/ path carries its own project, which the provider
     # reads back into subnetwork_project; forcing var.project there diffs forever.
-    subnetwork         = var.subnetwork != null ? var.subnetwork : (var.use_default_network ? data.google_compute_subnetwork.this["default"].self_link : google_compute_subnetwork.this[var.name].self_link)
-    subnetwork_project = var.subnetwork != null && can(regex("^(https://|projects/)", var.subnetwork)) ? null : var.project
+    subnetwork         = var.subnetwork != null ? var.subnetwork.self_link : (var.use_default_network ? data.google_compute_subnetwork.this["default"].self_link : google_compute_subnetwork.this[var.name].self_link)
+    subnetwork_project = var.subnetwork != null && can(regex("^(https://|projects/)", var.subnetwork.self_link)) ? null : var.project
 
     dynamic "access_config" {
       for_each = var.assign_external_ip ? [1] : []
