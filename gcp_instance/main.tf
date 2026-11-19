@@ -58,6 +58,11 @@ resource "google_compute_address" "this" {
   project = var.project
 }
 
+moved {
+  from = google_compute_address.this
+  to   = google_compute_address.this[0]
+}
+
 resource "google_compute_instance" "this" {
   name         = var.name
   machine_type = var.machine_type
