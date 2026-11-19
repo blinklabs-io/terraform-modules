@@ -74,13 +74,13 @@ Cloud KMS creates the version of an external key from the key's URI or path in
 the external key manager, which this module does not take as input. Keys with
 `version_template.protection_level` set to `EXTERNAL` or `EXTERNAL_VPC` are
 therefore created with no key version; `SOFTWARE` and `HSM` keys are created
-with their first version. An `EXTERNAL_VPC` key also needs `crypto_key_backend`
-set to its EKM connection.
+with their first version. `crypto_key_backend` optionally sets the EKM
+connection of an `EXTERNAL_VPC` key.
 
 Create the version after the key exists, with `gcloud kms keys versions create`
 and `--external-key-uri` for `EXTERNAL` keys or `--ekm-connection-key-path` for
-`EXTERNAL_VPC` keys, or with a `google_kms_crypto_key_version` resource that
-references the key ID from the `key_ids` output. See
+manually managed `EXTERNAL_VPC` keys, or with a `google_kms_crypto_key_version`
+resource that references the key ID from the `key_ids` output. See
 [Create an external key](https://docs.cloud.google.com/kms/docs/create-external-key).
 
 ## Requirements
@@ -107,7 +107,7 @@ references the key ID from the `key_ids` output. See
 | purpose                    | `ENCRYPT_DECRYPT`, `ASYMMETRIC_SIGN`, `ASYMMETRIC_DECRYPT`, `RAW_ENCRYPT_DECRYPT`, or `MAC`     | `string`            | No       | `"ENCRYPT_DECRYPT"` |
 | rotation_period            | Automatic rotation period of at least `86400s`, such as `7776000s`; `ENCRYPT_DECRYPT` keys only | `string`            | No       | `null`              |
 | version_template           | Algorithm and protection level of new versions; required unless purpose is `ENCRYPT_DECRYPT`    | `object`            | No       | `null`              |
-| crypto_key_backend         | EKM connection of an `EXTERNAL_VPC` key; required for and only valid with `EXTERNAL_VPC`        | `string`            | No       | `null`              |
+| crypto_key_backend         | EKM connection of an `EXTERNAL_VPC` key; only valid with `EXTERNAL_VPC`                         | `string`            | No       | `null`              |
 | destroy_scheduled_duration | Recovery period for destroyed versions in seconds, such as `2592000s`; immutable                | `string`            | No       | `null`              |
 | labels                     | Labels for the key                                                                              | `map(string)`       | No       | `{}`                |
 | iam_members                | Map of role to list of members granted that role on the key                                     | `map(list(string))` | No       | `{}`                |
