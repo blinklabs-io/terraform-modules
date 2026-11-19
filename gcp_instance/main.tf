@@ -85,8 +85,10 @@ resource "google_compute_instance" "this" {
   }
 
   network_interface {
+    # A self_link or projects/ path carries its own project, which the provider
+    # reads back into subnetwork_project; forcing var.project there diffs forever.
     subnetwork         = var.subnetwork != null ? var.subnetwork : (var.use_default_network ? data.google_compute_subnetwork.this["default"].self_link : google_compute_subnetwork.this[var.name].self_link)
-    subnetwork_project = var.project
+    subnetwork_project = var.subnetwork != null && can(regex("^(https://|projects/)", var.subnetwork)) ? null : var.project
 
     dynamic "access_config" {
       for_each = var.assign_external_ip ? [1] : []
