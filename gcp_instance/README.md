@@ -66,7 +66,7 @@ module "instance" {
 
 ```hcl
 module "instance" {
-  source = "git::https://github.com/blinklabs-io/terraform-modules.git?ref=gcp_instance/v0.2.0"
+  source = "git::https://github.com/blinklabs-io/terraform-modules.git?ref=gcp_instance/v0.3.0"
 
   name         = "my-instance"
   machine_type = "e2-medium"
